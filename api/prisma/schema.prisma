@@ -1,0 +1,64 @@
+// MaintNotary Lite — database schema (spec §15)
+// Shared contract between Backend (owns this schema) and Blockchain's
+// anchor worker (reads/writes the same `records` table).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RecordStatus {
+  pending_anchor
+  tx_submitted
+  anchored
+  anchor_failed
+}
+
+enum RecordSource {
+  manual
+  import
+}
+
+model Record {
+  id              String       @id @default(uuid())
+  recordId        String       @unique @map("record_id")
+  vin             String       @db.VarChar(17)
+  serviceType     String       @map("service_type") @db.VarChar(64)
+  odometerMiles   Int          @map("odometer_miles")
+  completedAt     DateTime     @map("completed_at")
+  shopName        String       @map("shop_name") @db.VarChar(255)
+  source          RecordSource
+  canonicalJson   Json         @map("canonical_json")
+  contentHash     String       @map("content_hash") @db.VarChar(64)
+  status          RecordStatus @default(pending_anchor)
+  txHash          String?      @map("tx_hash")
+  txSubmittedAt   DateTime?    @map("tx_submitted_at")
+  anchoredAt      DateTime?    @map("anchored_at")
+  retryCount      Int          @default(0) @map("retry_count")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  auditLogs AuditLog[]
+
+  @@index([vin])
+  @@index([serviceType])
+  @@index([odometerMiles])
+  @@index([completedAt])
+  @@map("records")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  recordUuid  String   @map("record_uuid")
+  record      Record   @relation(fields: [recordUuid], references: [id])
+  action      String
+  details     Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([recordUuid])
+  @@map("audit_log")
+}

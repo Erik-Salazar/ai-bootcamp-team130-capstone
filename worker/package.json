@@ -1,0 +1,25 @@
+{
+  "name": "@maintnotary/worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Anchor worker: polls pending_anchor records, submits tx via viem, updates status (spec §7, §11)",
+  "main": "dist/anchor.js",
+  "scripts": {
+    "dev": "tsx watch src/anchor.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/anchor.js",
+    "test": "tsx --test src/**/*.test.ts",
+    "prisma:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@maintnotary/shared": "*",
+    "@prisma/client": "^5.19.1",
+    "dotenv": "^16.4.5",
+    "viem": "^2.21.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "algorithm": "SHA-256 over deep-key-sorted canonical JSON with `source` field removed (spec §8)",
+  "vectors": [
+    {
+      "id": "T-vector-001",
+      "input": {
+        "schema_version": "1.0",
+        "record_id": "wo-test-001",
+        "vin": "1FUJGHDV8CLBR1234",
+        "equipment_label": "Truck 104",
+        "service_type": "PM-A",
+        "completed_at": "2026-07-08T14:22:00Z",
+        "odometer_miles": 142318,
+        "shop_name": "In-house shop",
+        "notes": "Oil, filters, brake inspection",
+        "source": "manual"
+      },
+      "expected_sha256": "535844002a6967e86b3f117acd4ecaa3ab16909f79ee21dcb5244f479bb06ab5"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+node_modules/
+dist/
+build/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+coverage/
+*.tsbuildinfo
+
+# Prisma
+api/prisma/dev.db
+api/generated/
+
+# Hardhat
+contracts/cache/
+contracts/artifacts/
+contracts/typechain-types/
+
+# Vite / React
+web/dist/
+
+# Editor
+.vscode/
+!.vscode/extensions.json
+.idea/

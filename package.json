@@ -1,0 +1,22 @@
+{
+  "name": "maintnotary",
+  "private": true,
+  "version": "0.1.0",
+  "description": "MaintNotary Lite - a thin trust layer for fleet maintenance records (baseline monorepo)",
+  "workspaces": [
+    "shared",
+    "api",
+    "worker",
+    "contracts",
+    "web"
+  ],
+  "scripts": {
+    "build:shared": "npm run build --workspace=shared",
+    "dev:api": "npm run dev --workspace=api",
+    "dev:worker": "npm run dev --workspace=worker",
+    "dev:web": "npm run dev --workspace=web",
+    "test:shared": "npm run test --workspace=shared",
+    "test:api": "npm run test --workspace=api",
+    "test:contracts": "npm run test --workspace=contracts"
+  }
+}
