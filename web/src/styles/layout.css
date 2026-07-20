@@ -1,0 +1,82 @@
+/* App header — Trimble dark navbar */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 56px;
+  background: linear-gradient(135deg, var(--modus-gray-9), #1a2530);
+  color: white;
+  border-bottom: 3px solid var(--modus-primary);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.app-logo {
+  opacity: 0.85;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.app-header nav {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.app-header nav a {
+  color: var(--modus-gray-3);
+  text-decoration: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+
+.app-header nav a:hover {
+  color: white;
+  background: var(--modus-gray-7);
+  transform: translateY(-1px);
+}
+
+.app-header nav a.active {
+  color: white;
+  background: var(--modus-primary);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 99, 163, 0.3);
+}
+
+/* Main content area */
+main {
+  padding: 2.5rem 2rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* Page typography */
+h2 {
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: var(--modus-gray-8);
+}
+
+.page-subtitle {
+  color: var(--modus-gray-5);
+  margin: 0 0 1.5rem;
+  font-size: 0.875rem;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}

@@ -1,0 +1,146 @@
+/* Form fields, labels, hints, errors */
+.form-section {
+  border: 1px solid var(--modus-gray-2);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  background: var(--modus-gray-0);
+}
+
+.form-section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--modus-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.section-icon {
+  margin-right: 0.3rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  overflow: visible;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-row--half > * {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .form-row--half {
+    flex-direction: column;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.4rem;
+  overflow: visible;
+}
+
+.form-field:last-child {
+  margin-bottom: 0;
+}
+
+.form-field label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--modus-gray-6);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1.8;
+}
+
+.required {
+  color: var(--modus-danger);
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--modus-gray-3);
+  border-radius: 4px;
+  background: var(--modus-gray-0);
+  color: var(--modus-gray-8);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  border-color: var(--modus-primary);
+  box-shadow: 0 0 0 2px var(--modus-primary-light);
+}
+
+.form-field input[aria-invalid="true"],
+.form-field textarea[aria-invalid="true"] {
+  border-color: var(--modus-danger);
+}
+
+.form-field input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 2px var(--modus-danger-light);
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 64px;
+}
+
+.field-error {
+  font-size: 0.75rem;
+  color: var(--modus-danger);
+  font-weight: 500;
+}
+
+.field-hint {
+  font-size: 0.7rem;
+  color: var(--modus-gray-4);
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Form banner (general errors) */
+.form-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.form-banner--error {
+  background: var(--modus-danger-light);
+  border: 1px solid var(--modus-danger);
+  color: #7a1016;
+}
+
+.banner-icon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.form-banner p {
+  margin: 0;
+}

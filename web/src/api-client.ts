@@ -33,6 +33,56 @@ export interface VerifyResponse {
   message?: string;
 }
 
+export interface SubmitRecordRequest {
+  record_id: string;
+  vin: string;
+  equipment_label?: string;
+  service_type: string;
+  completed_at: string;
+  odometer_miles: number;
+  shop_name: string;
+  notes?: string;
+}
+
+export interface SubmitRecordResponse {
+  success: true;
+  id: string;
+  record_id: string;
+  status: "pending_anchor";
+  verify_url: string;
+}
+
+export interface ImportPayload {
+  event: "work_order.completed";
+  payload: {
+    work_order_id: string;
+    vehicle_vin: string;
+    vehicle_name?: string;
+    service_type: string;
+    completed_at: string;
+    odometer: number;
+    vendor_name: string;
+    description?: string;
+  };
+}
+
+export interface ApiValidationError {
+  code: string;
+  field: string;
+  message: string;
+}
+
+export class ApiError extends Error {
+  public status: number;
+  public errors: ApiValidationError[];
+
+  constructor(status: number, errors: ApiValidationError[], message?: string) {
+    super(message ?? errors[0]?.message ?? `Request failed: ${status}`);
+    this.status = status;
+    this.errors = errors;
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     headers: { "Content-Type": "application/json" },
@@ -40,7 +90,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body?.errors?.[0]?.message ?? `Request failed: ${res.status}`);
+    throw new ApiError(res.status, body?.errors ?? [], body?.errors?.[0]?.message);
   }
   return res.json() as Promise<T>;
 }
@@ -65,5 +115,22 @@ export function verifyJson(record: unknown) {
   });
 }
 
-// TODO(Frontend): submitRecord(), importRecord(), retryRecord() — all need
-// the Authorization: Bearer <FLEET_API_KEY> header once auth UX is designed.
+export function submitRecord(record: SubmitRecordRequest) {
+  return request<SubmitRecordResponse>("/records", {
+    method: "POST",
+    body: JSON.stringify(record),
+  });
+}
+
+export function importRecord(payload: ImportPayload) {
+  return request<SubmitRecordResponse>("/import", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function retryRecord(id: string) {
+  return request<{ success: true }>(`/records/${id}/retry`, {
+    method: "POST",
+  });
+}

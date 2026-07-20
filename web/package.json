@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@trimble-oss/moduswebcomponents": "^1.10.0",
+    "@trimble-oss/moduswebcomponents-react": "^1.9.1-react18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2"

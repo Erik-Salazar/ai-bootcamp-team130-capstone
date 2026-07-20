@@ -1,0 +1,73 @@
+/* Buttons — Trimble Modus style */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  line-height: 1.5;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--modus-primary);
+  color: white;
+  border-color: var(--modus-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--modus-primary-dark);
+  border-color: var(--modus-primary-dark);
+}
+
+.btn-secondary {
+  background: var(--modus-gray-0);
+  color: var(--modus-gray-8);
+  border-color: var(--modus-gray-3);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--modus-gray-1);
+  border-color: var(--modus-gray-4);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--modus-gray-5);
+  border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--modus-gray-1);
+  color: var(--modus-gray-7);
+}
+
+.btn-lg {
+  padding: 0.65rem 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* Spinner */
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

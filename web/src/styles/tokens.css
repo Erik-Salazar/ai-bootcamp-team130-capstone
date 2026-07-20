@@ -1,0 +1,43 @@
+/* Trimble Modus 2.0 design tokens */
+:root {
+  /* Trimble brand colors */
+  --modus-primary: #0063a3;
+  --modus-primary-dark: #004f83;
+  --modus-primary-light: #dcedf9;
+  --modus-secondary: #6a6e79;
+  --modus-success: #006638;
+  --modus-success-light: #dff1e7;
+  --modus-danger: #da212c;
+  --modus-danger-light: #fbd4d7;
+  --modus-warning: #e49325;
+  --modus-warning-light: #fff3cd;
+
+  /* Neutral palette */
+  --modus-gray-0: #ffffff;
+  --modus-gray-1: #f1f1f6;
+  --modus-gray-2: #e0e1e9;
+  --modus-gray-3: #cbcdd6;
+  --modus-gray-4: #90939f;
+  --modus-gray-5: #6a6e79;
+  --modus-gray-6: #464b52;
+  --modus-gray-7: #353a40;
+  --modus-gray-8: #252a2e;
+  --modus-gray-9: #171c1e;
+
+  /* Typography */
+  font-family: "Open Sans", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--modus-gray-8);
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--modus-gray-1);
+}
+
+.mono {
+  font-family: "Roboto Mono", "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.5px;
+}

@@ -1,0 +1,25 @@
+/* Status badges — Trimble Modus chips */
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-pending {
+  background: var(--modus-primary-light);
+  color: var(--modus-primary-dark);
+}
+
+.status-anchored {
+  background: var(--modus-success-light);
+  color: var(--modus-success);
+}
+
+.status-failed {
+  background: var(--modus-danger-light);
+  color: var(--modus-danger);
+}

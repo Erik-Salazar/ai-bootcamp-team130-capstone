@@ -1,0 +1,120 @@
+/* Custom Select Dropdown */
+.custom-select {
+  position: relative;
+}
+
+.custom-select__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  border: 1.5px solid #d1d8e4;
+  border-radius: 8px;
+  background: var(--modus-gray-0);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.12s, box-shadow 0.12s;
+  outline: none;
+}
+
+.custom-select__trigger:hover {
+  border-color: #93b4e8;
+}
+
+.custom-select__trigger:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.custom-select--invalid .custom-select__trigger {
+  border-color: var(--modus-danger);
+}
+
+.custom-select--open .custom-select__trigger {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.custom-select__value {
+  color: var(--modus-gray-8);
+  font-weight: 500;
+}
+
+.custom-select__placeholder {
+  color: var(--modus-gray-4);
+}
+
+.custom-select__arrow {
+  color: var(--modus-gray-4);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.custom-select--open .custom-select__arrow {
+  transform: rotate(180deg);
+  color: var(--modus-primary);
+}
+
+/* Dropdown menu */
+.custom-select__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--modus-gray-0);
+  border: 1px solid var(--modus-gray-2);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 30, 60, 0.12), 0 2px 8px rgba(15, 30, 60, 0.06);
+  padding: 0.35rem;
+  margin: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  animation: dropIn 0.15s ease;
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.custom-select__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--modus-gray-7);
+  transition: background 0.1s, color 0.1s;
+}
+
+.custom-select__option--focused,
+.custom-select__option:hover {
+  background: #eef3fb;
+  color: var(--modus-primary);
+}
+
+.custom-select__option--selected {
+  color: var(--modus-primary);
+  font-weight: 600;
+  background: var(--modus-primary-light);
+}
+
+.custom-select__option--selected:hover {
+  background: var(--modus-primary-light);
+}
+
+.custom-select__option svg {
+  color: var(--modus-primary);
+}
