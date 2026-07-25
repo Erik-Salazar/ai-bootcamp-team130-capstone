@@ -34,33 +34,58 @@
 }
 
 .app-header nav a {
-  color: var(--modus-gray-3);
+  color: rgba(255, 255, 255, 0.72);
   text-decoration: none;
-  padding: 0.4rem 0.75rem;
-  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 500;
-  transition: background 0.2s, color 0.2s, transform 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .app-header nav a:hover {
   color: white;
-  background: var(--modus-gray-7);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .app-header nav a.active {
   color: white;
   background: var(--modus-primary);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 99, 163, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Main content area */
 main {
-  padding: 2.5rem 2rem;
-  max-width: 960px;
+  padding: 2rem 1.5rem 3rem;
+  max-width: 1120px;
   margin: 0 auto;
+}
+
+/* Shared page header */
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-header--accent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding-left: 1rem;
+  border-left: 4px solid var(--modus-primary);
+}
+
+.page-header--accent h2 {
+  margin-bottom: 0.2rem;
+}
+
+.page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 /* Page typography */
@@ -69,14 +94,30 @@ h2 {
   font-weight: 700;
   margin: 0 0 0.25rem;
   color: var(--modus-gray-8);
+  letter-spacing: -0.3px;
 }
 
 .page-subtitle {
   color: var(--modus-gray-5);
-  margin: 0 0 1.5rem;
+  margin: 0;
   font-size: 0.875rem;
+  line-height: 1.5;
+  max-width: 36rem;
 }
 
-.page-header {
-  margin-bottom: 1.5rem;
+/* Placeholder pages */
+.placeholder-card {
+  background: var(--modus-gray-0);
+  border: 1px solid var(--modus-gray-2);
+  border-radius: 8px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  color: var(--modus-gray-5);
+  box-shadow: 0 2px 8px rgba(15, 30, 60, 0.06);
+  border-top: 4px solid var(--modus-primary);
+}
+
+.placeholder-card p {
+  margin: 0;
+  font-size: 0.9rem;
 }

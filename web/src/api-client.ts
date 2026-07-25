@@ -4,11 +4,13 @@
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api";
+const API_KEY = import.meta.env.VITE_API_KEY as string | undefined;
 
 export interface ApiRecordSummary {
   id: string;
   record_id: string;
   vin: string;
+  equipment_label?: string;
   service_type: string;
   completed_at: string;
   odometer_miles: number;
@@ -84,9 +86,17 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(init?.headers as Record<string, string> | undefined),
+  };
+  if (API_KEY && init?.method && init.method !== "GET") {
+    headers.Authorization = `Bearer ${API_KEY}`;
+  }
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...init,
+    headers,
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -95,8 +105,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function listRecords(params: { vin?: string; status?: string } = {}) {
-  const qs = new URLSearchParams(params as Record<string, string>).toString();
+export function listRecords(params: { vin?: string; status?: string; limit?: number; offset?: number } = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params)
+      .filter(([, value]) => value !== undefined && value !== "")
+      .map(([key, value]) => [key, String(value)]),
+  ).toString();
   return request<ListRecordsResponse>(`/records${qs ? `?${qs}` : ""}`);
 }
 

@@ -11,6 +11,7 @@ import "./styles/badges.css";
 import "./styles/submit.css";
 import "./styles/select.css";
 import "./styles/datepicker.css";
+import "./styles/dashboard.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

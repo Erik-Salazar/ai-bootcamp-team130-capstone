@@ -1,25 +1,58 @@
 /* Status badges — Trimble Modus chips */
 .status-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.35px;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
 
 .status-pending {
   background: var(--modus-primary-light);
   color: var(--modus-primary-dark);
+  border-color: #b8d4ee;
 }
 
 .status-anchored {
   background: var(--modus-success-light);
   color: var(--modus-success);
+  border-color: #b8dfc8;
 }
 
 .status-failed {
   background: var(--modus-danger-light);
   color: var(--modus-danger);
+  border-color: #f0b8bc;
+}
+
+.status-tx {
+  background: var(--modus-warning-light);
+  color: #8a5a00;
+  border-color: #f0d9a8;
+}
+
+.demo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #5a4a00;
+  background: var(--modus-warning-light);
+  border: 1px solid #f0d9a8;
+  border-radius: 999px;
+}
+
+.demo-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--modus-warning);
 }

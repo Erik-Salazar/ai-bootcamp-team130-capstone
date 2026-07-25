@@ -53,9 +53,61 @@
   color: var(--modus-gray-7);
 }
 
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--modus-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.12s;
+}
+
+.btn-link:hover:not(:disabled) {
+  color: var(--modus-primary-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.btn-link--muted {
+  color: var(--modus-gray-5);
+}
+
+.btn-link--muted:hover:not(:disabled) {
+  color: var(--modus-gray-7);
+}
+
+.btn-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.btn-link--danger {
+  color: var(--modus-danger);
+}
+
+.btn-link--danger:hover:not(:disabled) {
+  color: #a01822;
+}
+
 .btn-lg {
   padding: 0.65rem 1.5rem;
   font-size: 0.9rem;
+}
+
+.btn-icon {
+  padding: 0.4rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+}
+
+.btn-icon svg {
+  display: block;
 }
 
 /* Spinner */
