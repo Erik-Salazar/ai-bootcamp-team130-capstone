@@ -23,18 +23,14 @@
   border-color: #93b4e8;
 }
 
-.custom-select__trigger:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+.custom-select__trigger:focus,
+.custom-select--open .custom-select__trigger {
+  border-color: #d1d8e4;
+  box-shadow: none;
 }
 
 .custom-select--invalid .custom-select__trigger {
   border-color: var(--modus-danger);
-}
-
-.custom-select--open .custom-select__trigger {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .custom-select__value {

@@ -81,20 +81,10 @@
 
 /* AMS-style pill inputs — 8px radius, hover/focus rings */
 .submit-form input,
-.submit-form textarea,
-.submit-form select {
+.submit-form textarea {
   border-radius: 8px !important;
   border: 1.5px solid #d1d8e4;
   transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
-}
-
-.submit-form select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6e79' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  padding-right: 2.25rem;
-  cursor: pointer;
 }
 
 /* Date/time input styling */
@@ -133,14 +123,12 @@
 }
 
 .submit-form input:hover:not(:focus),
-.submit-form textarea:hover:not(:focus),
-.submit-form select:hover:not(:focus) {
+.submit-form textarea:hover:not(:focus) {
   border-color: #93b4e8;
 }
 
 .submit-form input:focus,
-.submit-form textarea:focus,
-.submit-form select:focus {
+.submit-form textarea:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
   outline: none;
