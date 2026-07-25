@@ -1,4 +1,4 @@
-/** Status filter values used by the dashboard toolbar, stat cards, and mock data. */
+/** Status filter values used by the dashboard toolbar, stat cards, and API records. */
 export type StatusFilterValue =
   | ""
   | "pending_anchor"

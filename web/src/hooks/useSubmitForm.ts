@@ -5,23 +5,9 @@ import {
   type SubmitRecordResponse,
   type ApiValidationError,
 } from "../api-client";
-import { INITIAL_SUBMIT_FORM, MOCK_SUBMIT_DELAY_MS } from "../lib/submit/constants";
+import { INITIAL_SUBMIT_FORM } from "../lib/submit/constants";
 import { toSubmitPayload } from "../lib/submit/payload";
 import type { SubmitFormData } from "../lib/submit/types";
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function createMockSuccess(form: SubmitFormData): SubmitRecordResponse {
-  return {
-    success: true,
-    id: crypto.randomUUID(),
-    record_id: form.record_id.trim(),
-    status: "pending_anchor",
-    verify_url: `${window.location.origin}/verify/${crypto.randomUUID()}`,
-  };
-}
 
 export function useSubmitForm() {
   const [formData, setFormData] = useState<SubmitFormData>(INITIAL_SUBMIT_FORM);
@@ -54,19 +40,15 @@ export function useSubmitForm() {
     setSubmitting(true);
 
     try {
-      let result: SubmitRecordResponse;
-
-      try {
-        result = await submitRecord(toSubmitPayload(formData));
-      } catch {
-        await delay(MOCK_SUBMIT_DELAY_MS);
-        result = createMockSuccess(formData);
-      }
-
+      const result = await submitRecord(toSubmitPayload(formData));
       setSuccess(result);
     } catch (err) {
       if (err instanceof ApiError) {
-        setErrors(err.errors);
+        setErrors(err.errors.length > 0 ? err.errors : [{
+          code: "REQUEST_FAILED",
+          field: "",
+          message: err.message || "Could not submit this record. Please try again.",
+        }]);
       } else {
         setErrors([{
           code: "NETWORK_ERROR",

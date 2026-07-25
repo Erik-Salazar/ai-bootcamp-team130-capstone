@@ -123,3 +123,31 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Copy button */
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--modus-primary);
+  background: var(--modus-primary-light);
+  border: 1px solid #c5d9f0;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-copy:hover {
+  background: #dcedf9;
+  border-color: var(--modus-primary);
+}
+
+.btn-copy--copied {
+  color: var(--modus-success);
+  background: var(--modus-success-light);
+  border-color: var(--modus-success);
+}

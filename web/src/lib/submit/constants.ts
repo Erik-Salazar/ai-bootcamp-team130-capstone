@@ -32,5 +32,3 @@ export const REQUIRED_SUBMIT_FIELDS: (keyof SubmitFormData)[] = [
 ];
 
 export const REQUIRED_FIELD_COUNT = REQUIRED_SUBMIT_FIELDS.length;
-
-export const MOCK_SUBMIT_DELAY_MS = 1200;

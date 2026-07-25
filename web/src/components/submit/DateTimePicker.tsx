@@ -34,6 +34,7 @@ export default function DateTimePicker({ id, name, value, onChange, required, in
   const [minute, setMinute] = useState(selected ? selected.getMinutes() : 0);
 
   const ref = useRef<HTMLDivElement>(null);
+  const [openAbove, setOpenAbove] = useState(false);
 
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
@@ -42,6 +43,12 @@ export default function DateTimePicker({ id, name, value, onChange, required, in
     document.addEventListener("mousedown", handleOutside);
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
+
+  useEffect(() => {
+    if (!open || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setOpenAbove(rect.bottom + 340 > window.innerHeight);
+  }, [open, viewMonth, viewYear]);
 
   function prevMonth() {
     if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); }
@@ -102,7 +109,7 @@ export default function DateTimePicker({ id, name, value, onChange, required, in
       </button>
 
       {open && (
-        <div className="dtp__popup">
+        <div className={`dtp__popup ${openAbove ? "dtp__popup--above" : ""}`}>
           <div className="dtp__header">
             <button type="button" className="dtp__nav" onClick={prevMonth}>‹</button>
             <span className="dtp__title">{MONTHS[viewMonth]} {viewYear}</span>

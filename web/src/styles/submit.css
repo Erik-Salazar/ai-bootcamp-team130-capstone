@@ -6,7 +6,6 @@
 .submit-page--narrow {
   max-width: 640px;
   margin: 0 auto;
-  padding-bottom: 200px;
 }
 
 /* Page header — AMS style with accent */
@@ -34,6 +33,8 @@
   box-shadow: 0 2px 8px rgba(15, 30, 60, 0.08), 0 1px 2px rgba(15, 30, 60, 0.04);
   position: relative;
   border-top: 4px solid var(--modus-primary);
+  margin-bottom: 2rem;
+  overflow: visible;
 }
 
 /* Round section header corners to match card */
@@ -339,9 +340,12 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .link-copy-row code {
+  flex: 1;
+  min-width: 0;
   font-size: 0.75rem;
   color: var(--modus-primary);
   word-break: break-all;

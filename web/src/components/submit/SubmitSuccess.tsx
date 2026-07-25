@@ -1,5 +1,6 @@
 import type { SubmitRecordResponse } from "../../api-client";
 import StatusBadge from "../StatusBadge";
+import CopyButton from "../CopyButton";
 
 interface SubmitSuccessProps {
   result: SubmitRecordResponse;
@@ -33,6 +34,7 @@ export default function SubmitSuccess({ result, onReset }: SubmitSuccessProps) {
         <label>Share this verification link</label>
         <div className="link-copy-row">
           <code>{result.verify_url}</code>
+          <CopyButton text={result.verify_url} label="Copy link" />
         </div>
       </div>
     </div>
