@@ -1,6 +1,10 @@
+import { Link } from "react-router-dom";
 import type { SubmitRecordResponse } from "../../api-client";
+import { getSafeAppLink } from "../../lib/security/safe-url";
+import { isValidRecordRouteId } from "../../lib/validation/route-id";
 import StatusBadge from "../StatusBadge";
 import CopyButton from "../CopyButton";
+import { SafeAppLink } from "../SafeLink";
 
 interface SubmitSuccessProps {
   result: SubmitRecordResponse;
@@ -8,6 +12,9 @@ interface SubmitSuccessProps {
 }
 
 export default function SubmitSuccess({ result, onReset }: SubmitSuccessProps) {
+  const safeVerifyLink = getSafeAppLink(result.verify_url);
+  const canViewRecord = isValidRecordRouteId(result.id);
+
   return (
     <div className="submit-success">
       <div className="success-icon" aria-hidden="true">
@@ -26,17 +33,25 @@ export default function SubmitSuccess({ result, onReset }: SubmitSuccessProps) {
         The record passed validation and is queued for on-chain anchoring. Once the transaction confirms, anyone with the verify link can prove this record has not been altered.
       </p>
       <div className="success-actions">
-        <a href={result.verify_url} className="btn btn-primary">Open Verify Link</a>
-        <a href={`/records/${result.id}`} className="btn btn-secondary">View Record</a>
+        {safeVerifyLink && (
+          <SafeAppLink href={result.verify_url} className="btn btn-primary">
+            Open Verify Link
+          </SafeAppLink>
+        )}
+        {canViewRecord && (
+          <Link to={`/records/${result.id}`} className="btn btn-secondary">View Record</Link>
+        )}
         <button type="button" onClick={onReset} className="btn btn-ghost">Submit Another</button>
       </div>
-      <div className="success-link-copy">
-        <label>Share this verification link</label>
-        <div className="link-copy-row">
-          <code>{result.verify_url}</code>
-          <CopyButton text={result.verify_url} label="Copy link" />
+      {safeVerifyLink && (
+        <div className="success-link-copy">
+          <label>Share this verification link</label>
+          <div className="link-copy-row">
+            <code>{safeVerifyLink}</code>
+            <CopyButton text={safeVerifyLink} label="Copy link" />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

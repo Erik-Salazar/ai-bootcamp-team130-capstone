@@ -96,6 +96,11 @@
   box-shadow: 0 0 0 2px var(--modus-danger-light);
 }
 
+.form-field--invalid input,
+.form-field--invalid textarea {
+  border-color: var(--modus-danger);
+}
+
 .form-field textarea {
   resize: vertical;
   min-height: 64px;

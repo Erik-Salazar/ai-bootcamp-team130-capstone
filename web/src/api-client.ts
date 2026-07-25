@@ -1,9 +1,21 @@
 /**
  * Thin fetch wrapper for the MaintNotary API (spec §10).
  * Framework-agnostic on purpose — no React imports here.
+ *
+ * Security note: VITE_API_KEY is bundled into the client build. Use only for
+ * local demos; production should proxy writes through a trusted backend.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api";
+import {
+  assertSafeApiPath,
+  buildRecordPath,
+  buildRetryPath,
+  buildVerifyPath,
+  getSafeApiBaseUrl,
+} from "./lib/security/api-path";
+import { API_REQUEST_TIMEOUT_MS } from "./lib/security/constants";
+
+const API_BASE_URL = getSafeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 const API_KEY = import.meta.env.VITE_API_KEY as string | undefined;
 
 export interface ApiRecordSummary {
@@ -18,6 +30,27 @@ export interface ApiRecordSummary {
   tx_hash: string | null;
   anchored_at: string | null;
   verify_url: string;
+}
+
+export interface ApiRecordDetail {
+  id: string;
+  record_id: string;
+  vin: string;
+  equipment_label?: string;
+  service_type: string;
+  completed_at: string;
+  odometer_miles: number;
+  shop_name: string;
+  notes?: string;
+  source: string;
+  status: string;
+  content_hash: string | null;
+  tx_hash: string | null;
+  anchored_at: string | null;
+  explorer_url?: string | null;
+  verify_url: string;
+  retry_count: number;
+  created_at: string;
 }
 
 export interface ListRecordsResponse {
@@ -86,23 +119,42 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const safePath = assertSafeApiPath(path);
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init?.headers as Record<string, string> | undefined),
   };
+
   if (API_KEY && init?.method && init.method !== "GET") {
     headers.Authorization = `Bearer ${API_KEY}`;
   }
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers,
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, body?.errors ?? [], body?.errors?.[0]?.message);
+  try {
+    const res = await fetch(`${API_BASE_URL}${safePath}`, {
+      ...init,
+      headers,
+      signal: controller.signal,
+      credentials: "same-origin",
+      redirect: "follow",
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new ApiError(res.status, body?.errors ?? [], body?.errors?.[0]?.message);
+    }
+
+    return res.json() as Promise<T>;
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new ApiError(408, [], "Request timed out. Please try again.");
+    }
+    throw err;
+  } finally {
+    window.clearTimeout(timeout);
   }
-  return res.json() as Promise<T>;
 }
 
 export function listRecords(params: { vin?: string; status?: string; limit?: number; offset?: number } = {}) {
@@ -115,11 +167,11 @@ export function listRecords(params: { vin?: string; status?: string; limit?: num
 }
 
 export function getRecord(id: string) {
-  return request(`/records/${id}`);
+  return request<ApiRecordDetail>(buildRecordPath(id));
 }
 
 export function verifyById(id: string) {
-  return request<VerifyResponse>(`/verify/${id}`);
+  return request<VerifyResponse>(buildVerifyPath(id));
 }
 
 export function verifyJson(record: unknown) {
@@ -144,7 +196,7 @@ export function importRecord(payload: ImportPayload) {
 }
 
 export function retryRecord(id: string) {
-  return request<{ success: true }>(`/records/${id}/retry`, {
+  return request<{ success: true }>(buildRetryPath(id), {
     method: "POST",
   });
 }

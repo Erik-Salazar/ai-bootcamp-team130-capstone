@@ -3,7 +3,7 @@ import { useRef } from "react";
 const EXAMPLE_JSON = `{
   "schema_version": "1.0",
   "record_id": "wo-2026-0042",
-  "vin": "1FUJGHDV8CLBR1234",
+  "vin": "1M8GDM9AXKP042788",
   "service_type": "PM-A",
   "completed_at": "2026-07-08T14:22:00Z",
   "odometer_miles": 142318,

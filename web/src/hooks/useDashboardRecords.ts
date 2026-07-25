@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { listRecords, retryRecord, type ApiRecordSummary } from "../api-client";
 import { VIN_DEBOUNCE_MS } from "../lib/dashboard/constants";
 import { matchesStatusFilter } from "../lib/record-status";
+import { normalizeVin } from "../lib/validation/vin";
 import { useDebouncedValue } from "./useDebouncedValue";
 
 export type RetryMessage = { type: "success" | "error"; text: string } | null;
@@ -12,7 +13,7 @@ function applyStatusFilter(records: ApiRecordSummary[], status: string) {
 
 export function useDashboardRecords() {
   const [records, setRecords] = useState<ApiRecordSummary[]>([]);
-  const [vinFilter, setVinFilter] = useState("");
+  const [vinFilter, setVinFilterState] = useState("");
   const vinDebounced = useDebouncedValue(vinFilter, VIN_DEBOUNCE_MS);
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
@@ -20,6 +21,11 @@ export function useDashboardRecords() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [retryMessage, setRetryMessage] = useState<RetryMessage>(null);
+
+  function setVinFilter(value: string) {
+    setRetryMessage(null);
+    setVinFilterState(normalizeVin(value).slice(0, 17));
+  }
 
   const loadRecords = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);

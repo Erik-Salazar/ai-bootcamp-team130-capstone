@@ -43,12 +43,18 @@ export default function DashboardToolbar({
             <input
               id="vin-filter"
               type="search"
-              placeholder="e.g. 1FUJGHDV8CLBR1234"
+              placeholder="e.g. 1M8GDM9AXKP042788"
               value={vinFilter}
               onChange={(e) => onVinChange(e.target.value)}
               className="mono"
+              maxLength={17}
+              spellCheck={false}
+              autoComplete="off"
             />
           </div>
+          {vinFilter && (
+            <span className="dashboard-filter-hint">{vinFilter.length}/17 characters</span>
+          )}
         </div>
 
         <div className="dashboard-filter dashboard-filter--status">

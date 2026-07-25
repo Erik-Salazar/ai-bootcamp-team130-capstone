@@ -1,0 +1,39 @@
+import { Link } from "react-router-dom";
+import type { ApiRecordDetail } from "../../api-client";
+import StatusBadge from "../StatusBadge";
+
+interface RecordDetailHeaderProps {
+  record: ApiRecordDetail;
+  retrying: boolean;
+  onRetry: () => void;
+}
+
+export default function RecordDetailHeader({ record, retrying, onRetry }: RecordDetailHeaderProps) {
+  const showRetry = record.status === "anchor_failed";
+
+  return (
+    <header className="page-header page-header--accent">
+      <div>
+        <h2>Record Detail</h2>
+        <p className="record-detail__id">
+          <code>{record.record_id}</code>
+          <StatusBadge status={record.status} />
+        </p>
+      </div>
+      <div className="page-header__actions record-detail__actions">
+        <Link to="/" className="btn btn-secondary">Back to dashboard</Link>
+        <Link to={`/verify/${record.id}`} className="btn btn-secondary">Verify</Link>
+        {showRetry && (
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={retrying}
+            onClick={onRetry}
+          >
+            {retrying ? "Retrying…" : "Retry anchor"}
+          </button>
+        )}
+      </div>
+    </header>
+  );
+}

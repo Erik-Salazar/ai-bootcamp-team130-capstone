@@ -1,3 +1,4 @@
+import PageErrorCard from "../components/PageErrorCard";
 import VerifyHeader from "../components/verify/VerifyHeader";
 import VerifyHowItWorks from "../components/verify/VerifyHowItWorks";
 import VerifyJsonPanel from "../components/verify/VerifyJsonPanel";
@@ -21,7 +22,7 @@ export default function Verify() {
   } = useVerifyPage();
 
   const showJsonPanel = !id;
-  const showHowItWorks = showJsonPanel && !result && !loading;
+  const showHowItWorks = showJsonPanel && !result && !loading && !loadError;
 
   return (
     <section className="verify-page verify-page--narrow">
@@ -29,15 +30,18 @@ export default function Verify() {
 
       {showHowItWorks && <VerifyHowItWorks />}
 
-      {loadError && (
-        <div className="verify-banner verify-banner--error" role="alert">
-          {loadError}
-        </div>
+      {loadError && !loading && (
+        <PageErrorCard
+          title="Unable to verify record"
+          message={loadError}
+          backTo="/verify"
+          backLabel="Verify another record"
+        />
       )}
 
       {loading && <VerifyLoading />}
 
-      {!loading && result && (
+      {!loading && !loadError && result && (
         <VerifyResult result={result} />
       )}
 

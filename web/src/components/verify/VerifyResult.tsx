@@ -2,11 +2,19 @@ import type { VerifyResponse } from "../../api-client";
 import { formatDateTime } from "../../lib/format";
 import { getIntegrityMessage } from "../../lib/verify/messages";
 import CopyButton from "../CopyButton";
+import SafeExternalLink from "../SafeLink";
 import IntegrityBadge from "./IntegrityBadge";
 
 interface VerifyResultProps {
   result: VerifyResponse;
 }
+
+const INTEGRITY_VALUES = new Set<VerifyResponse["integrity"]>([
+  "verified",
+  "not_found",
+  "not_anchored",
+  "mismatch",
+]);
 
 function CopyableValue({ value, label }: { value: string; label: string }) {
   return (
@@ -18,16 +26,17 @@ function CopyableValue({ value, label }: { value: string; label: string }) {
 }
 
 export default function VerifyResult({ result }: VerifyResultProps) {
-  const isVerified = result.integrity === "verified";
+  const integrity = INTEGRITY_VALUES.has(result.integrity) ? result.integrity : "not_found";
+  const isVerified = integrity === "verified";
 
   return (
-    <div className={`verify-result verify-result--${result.integrity} verify-result--animated`}>
+    <div className={`verify-result verify-result--${integrity} verify-result--animated`}>
       <div className="verify-result__icon" aria-hidden="true">
         {isVerified ? (
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
             <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-        ) : result.integrity === "mismatch" ? (
+        ) : integrity === "mismatch" ? (
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
             <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -40,8 +49,8 @@ export default function VerifyResult({ result }: VerifyResultProps) {
       </div>
 
       <div className="verify-result__body">
-        <IntegrityBadge integrity={result.integrity} />
-        <p className="verify-result__message">{getIntegrityMessage(result)}</p>
+        <IntegrityBadge integrity={integrity} />
+        <p className="verify-result__message">{getIntegrityMessage({ ...result, integrity })}</p>
 
         {(result.record_id || result.content_hash || result.anchored_at || result.tx_hash) && (
           <dl className="verify-result__meta">
@@ -68,16 +77,13 @@ export default function VerifyResult({ result }: VerifyResultProps) {
                 <dt>Transaction</dt>
                 <dd>
                   <CopyableValue value={result.tx_hash} label="tx hash" />
-                  {result.explorer_url && (
-                    <a
-                      href={result.explorer_url}
-                      className="verify-result__explorer"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View on explorer →
-                    </a>
-                  )}
+                  <SafeExternalLink
+                    href={result.explorer_url}
+                    className="verify-result__explorer"
+                    explorer
+                  >
+                    View on explorer →
+                  </SafeExternalLink>
                 </dd>
               </>
             )}

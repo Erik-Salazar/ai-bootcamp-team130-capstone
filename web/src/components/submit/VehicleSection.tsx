@@ -37,6 +37,7 @@ export default function VehicleSection({ formData, fieldError, onChange }: Vehic
               name="record_id"
               type="text"
               placeholder="wo-2026-0042"
+              maxLength={128}
               value={formData.record_id}
               onChange={onChange}
               aria-invalid={!!fieldError("record_id")}
@@ -55,7 +56,7 @@ export default function VehicleSection({ formData, fieldError, onChange }: Vehic
               id="vin"
               name="vin"
               type="text"
-              placeholder="1FUJGHDV8CLBR1234"
+              placeholder="1M8GDM9AXKP042788"
               maxLength={17}
               value={formData.vin}
               onChange={onChange}

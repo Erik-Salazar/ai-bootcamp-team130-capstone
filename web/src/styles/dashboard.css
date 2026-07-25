@@ -117,6 +117,11 @@
   letter-spacing: 0.3px;
 }
 
+.dashboard-filter-hint {
+  font-size: 0.7rem;
+  color: var(--modus-gray-4);
+}
+
 .dashboard-filter input {
   width: 100%;
   padding: 0.45rem 0.75rem;

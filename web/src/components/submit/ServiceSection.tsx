@@ -73,6 +73,7 @@ export default function ServiceSection({
             name="shop_name"
             type="text"
             placeholder="In-house shop, Dallas Service Center…"
+            maxLength={256}
             value={formData.shop_name}
             onChange={onChange}
             aria-invalid={!!fieldError("shop_name")}
@@ -86,6 +87,7 @@ export default function ServiceSection({
             name="equipment_label"
             type="text"
             placeholder="Truck 104"
+            maxLength={128}
             value={formData.equipment_label}
             onChange={onChange}
           />
@@ -96,6 +98,7 @@ export default function ServiceSection({
             id="notes"
             name="notes"
             rows={3}
+            maxLength={4000}
             placeholder="Brief summary of work performed…"
             value={formData.notes}
             onChange={onChange}

@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { verifyById, verifyJson, type VerifyResponse } from "../api-client";
+import { MAX_JSON_TEXT_CHARS } from "../lib/security/constants";
 import { parseRecordJson } from "../lib/verify/parse-json";
+import { formatValidationErrors } from "../lib/validation/format-errors";
+import { isValidRecordRouteId } from "../lib/validation/route-id";
+import { validateVerifyRecord } from "../lib/validation/verify-record";
 
 export function useVerifyPage() {
   const { id } = useParams<{ id?: string }>();
@@ -14,6 +18,12 @@ export function useVerifyPage() {
   const [jsonSubmitting, setJsonSubmitting] = useState(false);
 
   const loadById = useCallback(async (recordId: string) => {
+    if (!isValidRecordRouteId(recordId)) {
+      setLoading(false);
+      setLoadError("This verification link is invalid. Check the URL and try again.");
+      return;
+    }
+
     setLoading(true);
     setLoadError(null);
     setResult(null);
@@ -40,6 +50,12 @@ export function useVerifyPage() {
       return;
     }
 
+    const validationErrors = validateVerifyRecord(parsed.data);
+    if (validationErrors.length > 0) {
+      setJsonError(formatValidationErrors(validationErrors));
+      return;
+    }
+
     setJsonError(null);
     setJsonSubmitting(true);
 
@@ -54,6 +70,17 @@ export function useVerifyPage() {
   }
 
   function handleFileUpload(file: File) {
+    const isJsonFile = file.name.toLowerCase().endsWith(".json") || file.type === "application/json";
+    if (!isJsonFile) {
+      setJsonError("Please upload a .json file.");
+      return;
+    }
+
+    if (file.size > MAX_JSON_TEXT_CHARS) {
+      setJsonError("JSON file must be smaller than 256 KB.");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") {
@@ -73,13 +100,18 @@ export function useVerifyPage() {
     setResult(null);
   }
 
+  function setJsonTextSafe(value: string) {
+    setJsonText(value.slice(0, MAX_JSON_TEXT_CHARS));
+    setJsonError(null);
+  }
+
   return {
     id,
     loading,
     loadError,
     result,
     jsonText,
-    setJsonText,
+    setJsonText: setJsonTextSafe,
     jsonError,
     jsonSubmitting,
     verifyPastedJson,
