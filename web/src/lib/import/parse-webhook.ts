@@ -1,4 +1,5 @@
 import { assertJsonTextSize, safeJsonParse } from "../security/safe-json";
+import { normalizeVin } from "../validation/vin";
 import type { ImportWebhookPayload } from "./types";
 import { IMPORT_EVENT } from "./types";
 
@@ -62,7 +63,14 @@ export function parseImportWebhook(input: string): { data: ImportWebhookPayload 
       event: IMPORT_EVENT,
       payload: {
         work_order_id: String(payload.work_order_id),
-        vehicle_vin: String(payload.vehicle_vin),
+        // Normalize once, here, so the preview shown to the user, the
+        // client-side validation, and the payload actually POSTed to
+        // /api/import all agree on the same VIN string. Previously the
+        // preview/validation used a cleaned VIN (stripped of non-VIN
+        // characters) while the raw, uncleaned string was submitted —
+        // letting a webhook VIN with stray formatting characters look
+        // "valid" in the UI and then get rejected by the API.
+        vehicle_vin: normalizeVin(String(payload.vehicle_vin)),
         vehicle_name: payload.vehicle_name ? String(payload.vehicle_name) : undefined,
         service_type: String(payload.service_type),
         completed_at: String(payload.completed_at),

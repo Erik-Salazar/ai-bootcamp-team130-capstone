@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { listRecords, retryRecord, type ApiRecordSummary } from "../api-client";
 import { VIN_DEBOUNCE_MS } from "../lib/dashboard/constants";
 import { matchesStatusFilter } from "../lib/record-status";
@@ -21,6 +21,9 @@ export function useDashboardRecords() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [retryMessage, setRetryMessage] = useState<RetryMessage>(null);
+  // Tracks the most recently started request so a slower, older response
+  // (e.g. from a filter that's since changed) can't clobber fresher state.
+  const latestRequestId = useRef(0);
 
   function setVinFilter(value: string) {
     setRetryMessage(null);
@@ -28,6 +31,8 @@ export function useDashboardRecords() {
   }
 
   const loadRecords = useCallback(async (isRefresh = false) => {
+    const requestId = ++latestRequestId.current;
+
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     setLoadError(null);
@@ -38,13 +43,17 @@ export function useDashboardRecords() {
 
     try {
       const result = await listRecords(params);
+      if (latestRequestId.current !== requestId) return; // superseded by a newer request
       setRecords(applyStatusFilter(result.records, statusFilter));
     } catch {
+      if (latestRequestId.current !== requestId) return;
       setRecords([]);
       setLoadError("Could not load records. Make sure the API is running at the configured URL.");
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (latestRequestId.current === requestId) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [vinDebounced, statusFilter]);
 

@@ -32,6 +32,24 @@ describe("parseImportWebhook", () => {
     const result = parseImportWebhook('{"event":"work_order.completed","payload":{"work_order_id":"wo-1"}}');
     expect("error" in result && result.error).toContain("vehicle_vin");
   });
+
+  it("normalizes vehicle_vin so the preview, validation, and submitted payload never diverge", () => {
+    // Regression test: a VIN with stray formatting characters (e.g. hyphens
+    // from an upstream system) used to look "valid" in the client preview
+    // (which silently stripped them before validating) while the raw,
+    // uncleaned VIN was what actually got submitted to /api/import — causing
+    // the API to reject a record the UI had just told the user was fine.
+    const webhook = JSON.parse(SAMPLE_WEBHOOK) as {
+      event: string;
+      payload: Record<string, unknown>;
+    };
+    webhook.payload.vehicle_vin = "1m8-gdm9ax-kp042788";
+
+    const result = parseImportWebhook(JSON.stringify(webhook));
+    if (!("data" in result)) throw new Error("expected valid webhook");
+
+    expect(result.data.payload.vehicle_vin).toBe("1M8GDM9AXKP042788");
+  });
 });
 
 describe("mapWebhookToCanonical", () => {

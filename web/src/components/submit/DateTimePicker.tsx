@@ -78,7 +78,12 @@ export default function DateTimePicker({ id, name, value, onChange, required, in
     setHour(h);
     setMinute(m);
     if (selected) {
-      const iso = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(selected.getDate()).padStart(2, "0")}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+      // Use the previously-selected date's own year/month/day, not the
+      // calendar's currently-browsed viewYear/viewMonth — otherwise just
+      // paging through months to look around (without picking a new day)
+      // and then changing the time would silently move the selected date
+      // to whatever month happens to be in view.
+      const iso = `${selected.getFullYear()}-${String(selected.getMonth() + 1).padStart(2, "0")}-${String(selected.getDate()).padStart(2, "0")}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
       onChange(iso);
     }
   }
