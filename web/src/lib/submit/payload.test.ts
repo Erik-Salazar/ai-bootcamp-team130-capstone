@@ -16,6 +16,7 @@ const validForm: SubmitFormData = {
 describe("toSubmitPayload", () => {
   it("sanitizes and normalizes form values for the API", () => {
     expect(toSubmitPayload(validForm)).toEqual({
+      schema_version: "1.0",
       record_id: "wo-2026-0042",
       vin: "1M8GDM9AXKP042788",
       equipment_label: "Truck 104",
