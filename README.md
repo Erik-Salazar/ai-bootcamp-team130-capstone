@@ -7,13 +7,9 @@ record hasn't been altered since it was filed.
 
 Full product/engineering spec: [`docs/MAINTNOTARY_SPEC.md`](docs/MAINTNOTARY_SPEC.md).
 
-> **Status:** baseline scaffold only. This repo sets up the monorepo
-> structure, tooling, shared types, DB schema, contract, and route/page
-> stubs described in the spec — it is a starting point for the team, not a
-> working implementation. See the `TODO(...)` comments throughout for what's
-> left to build, and the spec's `WORKPLAN_BACKEND.md` / `WORKPLAN_BLOCKCHAIN.md`
-> / `WORKPLAN_FRONTEND.md` references for per-owner task breakdowns (not yet
-> created — add them when the team kicks off).
+Work plans: [`docs/WORKPLAN_FRONTEND.md`](docs/WORKPLAN_FRONTEND.md) (and Backend/Blockchain plans from Erik).
+
+> **Status:** Frontend screens are implemented in `web/` (Submit, Dashboard, Verify, Record Detail, Import). API routes and the anchor worker are still being integrated by Neal and Erik — see each package's `TODO(...)` comments.
 
 ## Repo layout
 
@@ -85,7 +81,48 @@ After deploying, put the resulting contract address into
 npm run test:shared      # canonicalization/hash unit tests
 npm run test:api         # API unit tests (once written)
 npm run test:contracts   # Hardhat contract tests
+npm run test --workspace=web   # Frontend Vitest (unit + smoke)
 ```
+
+## Frontend (`web/`)
+
+**Owner:** Chidambari — see [`docs/WORKPLAN_FRONTEND.md`](docs/WORKPLAN_FRONTEND.md).
+
+### Screens
+
+| Route | Page | API |
+|-------|------|-----|
+| `/` | Dashboard — records table, VIN/status filters, retry | `GET /api/records` |
+| `/submit` | Manual record submission | `POST /api/records` |
+| `/verify`, `/verify/:id` | Public integrity check (by ID or JSON) | `GET/POST /api/verify` |
+| `/records/:id` | Record detail + anchor metadata | `GET /api/records/:id` |
+| `/import` | Mock FMS webhook import | `POST /api/import` |
+
+All fetch logic lives in `web/src/api-client.ts`.
+
+### Run locally
+
+```bash
+npm install
+cp web/.env.example web/.env
+npm run dev:web          # http://localhost:5173
+```
+
+`web/.env`:
+
+```
+VITE_API_BASE_URL=http://localhost:4000/api
+VITE_API_KEY=<fleet-api-key>    # required for POST endpoints
+```
+
+### Test & build
+
+```bash
+npm run test --workspace=web
+npm run build --workspace=web
+```
+
+Client-side validation mirrors spec §9 (V1–V8). Without a running API, read-only screens show empty/error states; write actions surface API errors instead of mock success.
 
 ## Where things stand vs. the spec
 
@@ -96,9 +133,9 @@ npm run test:contracts   # Hardhat contract tests
 - **Smart contract** (`contracts/contracts/MaintNotary.sol`) matches spec §12,
   with passing Hardhat tests for the happy path, double-anchor guard, and
   `onlyOwner` guard.
-- **API routes, validation rules (V1-V8), anchor worker polling loop, and all
-  UI screens** are stubbed with `TODO(...)` comments pointing at the relevant
-  spec section — these are the actual Week 1-4 deliverables per §6.
+- **Frontend** (`web/`) — all five UI screens built with Vitest tests; awaits live API + chain for full integration.
+- **API routes, validation rules (V1-V8), anchor worker polling loop** are stubbed
+  with `TODO(...)` comments — Neal (API) and Erik (worker/chain) own these.
 
 ## License
 

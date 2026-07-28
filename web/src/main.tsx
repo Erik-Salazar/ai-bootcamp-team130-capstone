@@ -14,6 +14,7 @@ import "./styles/datepicker.css";
 import "./styles/dashboard.css";
 import "./styles/verify.css";
 import "./styles/record-detail.css";
+import "./styles/import.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
