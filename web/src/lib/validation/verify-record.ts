@@ -1,4 +1,10 @@
 import type { ApiValidationError } from "../../api-client";
+import {
+  MAX_EQUIPMENT_LABEL_LENGTH,
+  MAX_NOTES_LENGTH,
+  MAX_RECORD_ID_LENGTH,
+  MAX_SHOP_NAME_LENGTH,
+} from "../security/constants";
 import { MAX_ODOMETER, MAX_SERVICE_TYPE_LENGTH, SUPPORTED_SCHEMA_VERSION } from "./constants";
 import { getVinValidationError, normalizeVin } from "./vin";
 
@@ -45,6 +51,38 @@ export function validateVerifyRecord(data: unknown): ApiValidationError[] {
     if (value === undefined || value === null || (typeof value === "string" && !value.trim())) {
       errors.push(missingField(field));
     }
+  }
+
+  if (typeof record.record_id === "string" && record.record_id.trim().length > MAX_RECORD_ID_LENGTH) {
+    errors.push({
+      code: "INVALID_FIELD",
+      field: "record_id",
+      message: `record_id must be ${MAX_RECORD_ID_LENGTH} characters or fewer.`,
+    });
+  }
+
+  if (typeof record.shop_name === "string" && record.shop_name.trim().length > MAX_SHOP_NAME_LENGTH) {
+    errors.push({
+      code: "INVALID_FIELD",
+      field: "shop_name",
+      message: `shop_name must be ${MAX_SHOP_NAME_LENGTH} characters or fewer.`,
+    });
+  }
+
+  if (typeof record.equipment_label === "string" && record.equipment_label.trim().length > MAX_EQUIPMENT_LABEL_LENGTH) {
+    errors.push({
+      code: "INVALID_FIELD",
+      field: "equipment_label",
+      message: `equipment_label must be ${MAX_EQUIPMENT_LABEL_LENGTH} characters or fewer.`,
+    });
+  }
+
+  if (typeof record.notes === "string" && record.notes.trim().length > MAX_NOTES_LENGTH) {
+    errors.push({
+      code: "INVALID_FIELD",
+      field: "notes",
+      message: `notes must be ${MAX_NOTES_LENGTH} characters or fewer.`,
+    });
   }
 
   if (typeof record.vin === "string") {

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { ApiRecordDetail } from "../../api-client";
 import { formatDateTime, formatOdometer } from "../../lib/format";
+import StatusBadge from "../StatusBadge";
 
 interface RecordOverviewCardProps {
   record: ApiRecordDetail;
@@ -18,7 +19,13 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 export default function RecordOverviewCard({ record }: RecordOverviewCardProps) {
   return (
     <section className="record-detail-card">
-      <h3 className="record-detail-card__title">Maintenance data</h3>
+      <div className="record-detail-card__head">
+        <h3 className="record-detail-card__title">Maintenance data</h3>
+        <div className="page-header__meta">
+          <code>{record.record_id}</code>
+          <StatusBadge status={record.status} />
+        </div>
+      </div>
       <dl className="record-detail-grid">
         <Field label="VIN"><code className="mono">{record.vin}</code></Field>
         <Field label="Equipment">{record.equipment_label || "—"}</Field>

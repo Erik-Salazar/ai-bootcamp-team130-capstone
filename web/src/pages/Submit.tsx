@@ -18,14 +18,14 @@ export default function Submit() {
 
   if (success) {
     return (
-      <section className="submit-page">
+      <section className="page page--narrow">
         <SubmitSuccess result={success} onReset={resetForm} />
       </section>
     );
   }
 
   return (
-    <section className="submit-page submit-page--narrow">
+    <section className="page page--narrow">
       <SubmitHeader />
       <SubmitForm
         formData={formData}

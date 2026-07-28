@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mapWebhookToCanonical } from "./map-webhook";
 import { parseImportWebhook } from "./parse-webhook";
+import { validateVerifyRecord } from "../validation/verify-record";
 
 const SAMPLE_WEBHOOK = `{
   "event": "work_order.completed",
@@ -50,5 +51,43 @@ describe("mapWebhookToCanonical", () => {
       notes: "Oil, filters, brake inspection",
       source: "import",
     });
+  });
+});
+
+describe("import canonical validation", () => {
+  it("accepts a valid mapped webhook", () => {
+    const parsed = parseImportWebhook(SAMPLE_WEBHOOK);
+    if (!("data" in parsed)) throw new Error("expected valid webhook");
+
+    const canonical = mapWebhookToCanonical(parsed.data);
+    expect(validateVerifyRecord(canonical)).toEqual([]);
+  });
+
+  it("rejects invalid VIN after mapping (V2)", () => {
+    const webhook = JSON.parse(SAMPLE_WEBHOOK) as {
+      event: string;
+      payload: Record<string, unknown>;
+    };
+    webhook.payload.vehicle_vin = "INVALID";
+
+    const parsed = parseImportWebhook(JSON.stringify(webhook));
+    if (!("data" in parsed)) throw new Error("expected valid webhook");
+
+    const errors = validateVerifyRecord(mapWebhookToCanonical(parsed.data));
+    expect(errors.some((e) => e.code === "INVALID_VIN")).toBe(true);
+  });
+
+  it("rejects future completed_at after mapping (V3)", () => {
+    const webhook = JSON.parse(SAMPLE_WEBHOOK) as {
+      event: string;
+      payload: Record<string, unknown>;
+    };
+    webhook.payload.completed_at = "2099-01-01T00:00:00Z";
+
+    const parsed = parseImportWebhook(JSON.stringify(webhook));
+    if (!("data" in parsed)) throw new Error("expected valid webhook");
+
+    const errors = validateVerifyRecord(mapWebhookToCanonical(parsed.data));
+    expect(errors.some((e) => e.code === "FUTURE_DATE")).toBe(true);
   });
 });

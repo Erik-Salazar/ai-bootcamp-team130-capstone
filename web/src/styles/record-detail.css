@@ -1,58 +1,26 @@
-/* Record detail page — spec §13.3 */
-
-.record-detail-page {
-  max-width: 820px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.record-detail__id {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin: 0.35rem 0 0;
-}
-
-.record-detail__id code {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--modus-gray-8);
-}
-
-.record-detail__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.record-detail-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+/* Record detail — spec §13.3 */
 
 .record-detail-card {
   padding: 1.25rem 1.35rem;
   background: var(--modus-gray-0);
   border: 1px solid var(--modus-gray-2);
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(15, 30, 60, 0.05);
+  border-top: 4px solid var(--modus-primary);
+  box-shadow: 0 2px 8px rgba(15, 30, 60, 0.06);
   animation: fadeSlideIn 0.35s ease both;
 }
 
 .record-detail-card--integrity {
-  border-left: 4px solid var(--modus-primary);
+  border-top-color: var(--modus-primary);
 }
 
 .record-detail-card__head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
 }
 
 .record-detail-card__title {
@@ -142,45 +110,10 @@
 
 .record-detail-verify-hint,
 .record-detail-json-hint {
-  margin: 0.5rem 0 0;
+  margin: 0 0 0.75rem;
   font-size: 0.8rem;
   color: var(--modus-gray-5);
   line-height: 1.45;
-}
-
-.record-detail-json-hint code {
-  font-size: 0.78rem;
-}
-
-.record-detail-json {
-  margin: 0.75rem 0 0;
-  padding: 1rem 1.1rem;
-  overflow-x: auto;
-  background: var(--modus-gray-1);
-  border: 1px solid var(--modus-gray-2);
-  border-radius: 6px;
-  font-size: 0.8rem;
-  line-height: 1.55;
-  color: var(--modus-gray-8);
-}
-
-.record-detail-banner {
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-size: 0.88rem;
-  line-height: 1.45;
-}
-
-.record-detail-banner--error {
-  background: #fdecea;
-  border: 1px solid #f5c6cb;
-  color: #842029;
-}
-
-.record-detail-banner--success {
-  background: #e8f5e9;
-  border: 1px solid #c8e6c9;
-  color: #1b5e20;
 }
 
 .record-detail-skeleton {
@@ -217,14 +150,5 @@
 
   .record-detail-meta {
     grid-template-columns: 1fr;
-  }
-
-  .record-detail__actions {
-    width: 100%;
-  }
-
-  .record-detail__actions .btn {
-    flex: 1;
-    justify-content: center;
   }
 }

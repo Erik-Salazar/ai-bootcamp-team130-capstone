@@ -40,4 +40,24 @@ describe("verify tampered vector (spec T6)", () => {
     expect(screen.getByText("This data does not match what was anchored.")).toBeInTheDocument();
     expect(screen.getByText(String(canonical.record_id))).toBeInTheDocument();
   });
+
+  it("renders verified result for the shared test vector (T7)", () => {
+    render(
+      <VerifyResult
+        result={{
+          integrity: "verified",
+          record_id: canonical.record_id as string,
+          content_hash: testVectors.vectors[0].expected_sha256,
+          anchored_at: "2026-07-08T14:25:00Z",
+          tx_hash: "0xabc123",
+          explorer_url: "https://sepolia.basescan.org/tx/0xabc123",
+          message: "This record matches its on-chain anchor.",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Integrity verified")).toBeInTheDocument();
+    expect(screen.getByText("This record matches its on-chain anchor.")).toBeInTheDocument();
+    expect(screen.getByText(testVectors.vectors[0].expected_sha256)).toBeInTheDocument();
+  });
 });

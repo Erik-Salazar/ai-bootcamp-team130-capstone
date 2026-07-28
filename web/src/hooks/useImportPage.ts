@@ -3,6 +3,8 @@ import { ApiError, importRecord, type SubmitRecordResponse } from "../api-client
 import { mapWebhookToCanonical } from "../lib/import/map-webhook";
 import { parseImportWebhook } from "../lib/import/parse-webhook";
 import { MAX_JSON_TEXT_CHARS } from "../lib/security/constants";
+import { formatValidationErrors } from "../lib/validation/format-errors";
+import { validateVerifyRecord } from "../lib/validation/verify-record";
 
 export function useImportPage() {
   const [jsonText, setJsonTextState] = useState("");
@@ -21,6 +23,13 @@ export function useImportPage() {
     () => (parsed ? mapWebhookToCanonical(parsed) : null),
     [parsed],
   );
+
+  const validationErrors = useMemo(
+    () => (preview ? validateVerifyRecord(preview) : []),
+    [preview],
+  );
+
+  const canSubmit = Boolean(preview && validationErrors.length === 0);
 
   function setJsonText(value: string) {
     setJsonTextState(value.slice(0, MAX_JSON_TEXT_CHARS));
@@ -67,6 +76,13 @@ export function useImportPage() {
       return;
     }
 
+    const canonical = mapWebhookToCanonical(result.data);
+    const clientErrors = validateVerifyRecord(canonical);
+    if (clientErrors.length > 0) {
+      setSubmitError(formatValidationErrors(clientErrors));
+      return;
+    }
+
     setParseError(null);
     setSubmitError(null);
     setSubmitting(true);
@@ -95,7 +111,8 @@ export function useImportPage() {
     submitting,
     success,
     preview,
-    canSubmit: Boolean(preview),
+    validationErrors,
+    canSubmit,
     handleFileUpload,
     clearForm,
     submitImport,

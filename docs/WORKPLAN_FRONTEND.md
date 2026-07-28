@@ -7,7 +7,7 @@
 
 > When this doc and `MAINTNOTARY_SPEC.md` disagree, the spec wins — raise the conflict in the weekly sync.
 
-**Last updated:** 2026-07-28 — frontend screens implemented; integration with live API + chain pending Neal/Erik merge.
+**Last updated:** 2026-07-28 — all frontend-owned screens, validation, security, and Vitest suite complete; live API + chain integration pending Neal/Erik.
 
 ---
 
@@ -65,12 +65,14 @@ web/
 - [x] Loading/error states on all screens
 - [ ] Full E2E against live stack + 10 demo records — blocked until integration
 
-### Week 4 — Import + polish 🔄
+### Week 4 — Import + polish ✅
 
 - [x] Import UI (`/import`, §13.5) — webhook textarea, preview, `POST /api/import`
+- [x] Import canonical validation (V1–V4, V7–V8) on mapped preview before submit
 - [x] Client validation + security hardening across all screens
-- [x] Vitest smoke tests for all pages
-- [x] Frontend section in README
+- [x] Shared page layout, cards, and banners (UI standardization)
+- [x] Vitest smoke tests for all pages + unit tests (validation, security, test vectors)
+- [x] `web/.env.example` + frontend section in README
 - [ ] Confirm local run end-to-end with Neal's API + Erik's deployed contract
 - [ ] Demo rehearsal (§19 script)
 
@@ -82,6 +84,7 @@ web/
 |------|--------|
 | Submit, Dashboard, Verify, Record Detail, Import UI built | ✅ |
 | Client validation + security on all inputs/links | ✅ |
+| Import canonical validation before submit | ✅ |
 | All API calls via `api-client.ts` | ✅ |
 | Verify communicates four `integrity` states | ✅ |
 | Dashboard filters + status badges + retry | ✅ |
@@ -94,7 +97,7 @@ web/
 
 ## 5. Watch-outs
 
-- **Server is source of truth for validation** — mirror V1–V8 for UX; surface Backend error codes verbatim.
+- **Server is source of truth for validation** — mirror V1–V4 and V7–V8 for UX; V5 (`MILEAGE_ROLLBACK`) and V6 (`DUPLICATE_RECORD`) are server-only and surfaced via API errors.
 - **Don't recompute hashes in the browser** — verification is server-side (§10).
 - **Copy tone:** integrity, not truth (§20).
 - **`VITE_API_KEY`** is visible in the client bundle — local demo only; use a backend proxy in production.

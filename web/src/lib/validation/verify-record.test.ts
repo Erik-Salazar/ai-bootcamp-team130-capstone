@@ -26,4 +26,40 @@ describe("validateVerifyRecord", () => {
     const errors = validateVerifyRecord(partial);
     expect(errors.some((e) => e.code === "MISSING_FIELD" && e.field === "shop_name")).toBe(true);
   });
+
+  it("reports field max lengths", () => {
+    const errors = validateVerifyRecord({
+      ...validRecord,
+      record_id: "x".repeat(129),
+      shop_name: "y".repeat(257),
+    });
+    expect(errors.some((e) => e.code === "INVALID_FIELD" && e.field === "record_id")).toBe(true);
+    expect(errors.some((e) => e.code === "INVALID_FIELD" && e.field === "shop_name")).toBe(true);
+  });
+
+  it("reports invalid VIN (V2)", () => {
+    const errors = validateVerifyRecord({ ...validRecord, vin: "TOO-SHORT" });
+    expect(errors.some((e) => e.code === "INVALID_VIN")).toBe(true);
+  });
+
+  it("reports future completed_at (V3)", () => {
+    const errors = validateVerifyRecord({
+      ...validRecord,
+      completed_at: "2099-01-01T00:00:00Z",
+    });
+    expect(errors.some((e) => e.code === "FUTURE_DATE")).toBe(true);
+  });
+
+  it("reports invalid odometer (V4)", () => {
+    expect(validateVerifyRecord({ ...validRecord, odometer_miles: 0 }).some((e) => e.code === "INVALID_ODOMETER")).toBe(true);
+    expect(validateVerifyRecord({ ...validRecord, odometer_miles: 2_000_000 }).some((e) => e.code === "INVALID_ODOMETER")).toBe(true);
+  });
+
+  it("reports invalid service type length (V7)", () => {
+    const errors = validateVerifyRecord({
+      ...validRecord,
+      service_type: "x".repeat(65),
+    });
+    expect(errors.some((e) => e.code === "INVALID_SERVICE")).toBe(true);
+  });
 });

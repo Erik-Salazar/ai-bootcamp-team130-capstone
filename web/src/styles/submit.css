@@ -1,26 +1,4 @@
-/* Submit page */
-.submit-page {
-  max-width: 1080px;
-}
-
-.submit-page--narrow {
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-/* Page header — AMS style with accent */
-.submit-page--narrow .page-header {
-  text-align: left;
-  margin-bottom: 1.5rem;
-  padding-left: 1rem;
-  border-left: 4px solid var(--modus-primary);
-}
-
-.submit-page--narrow .page-header h2 {
-  font-size: 1.4rem;
-  color: var(--modus-gray-8);
-  margin-bottom: 0.2rem;
-}
+/* Submit page — form card */
 
 /* Form card — elevated with top accent bar */
 .submit-form {

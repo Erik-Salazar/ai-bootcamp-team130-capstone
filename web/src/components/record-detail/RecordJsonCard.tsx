@@ -19,7 +19,7 @@ export default function RecordJsonCard({ record }: RecordJsonCardProps) {
         Read-only view of the canonical schema fields used for hashing (spec §8). The server strips
         <code> source</code> before computing the content hash.
       </p>
-      <pre className="record-detail-json"><code>{json}</code></pre>
+      <pre className="json-preview"><code>{json}</code></pre>
     </section>
   );
 }

@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import type { ApiRecordDetail } from "../../api-client";
-import StatusBadge from "../StatusBadge";
 
 interface RecordDetailHeaderProps {
   record: ApiRecordDetail;
@@ -15,12 +14,8 @@ export default function RecordDetailHeader({ record, retrying, onRetry }: Record
     <header className="page-header page-header--accent">
       <div>
         <h2>Record Detail</h2>
-        <p className="record-detail__id">
-          <code>{record.record_id}</code>
-          <StatusBadge status={record.status} />
-        </p>
       </div>
-      <div className="page-header__actions record-detail__actions">
+      <div className="page-header__actions">
         <Link to="/" className="btn btn-secondary">Back to dashboard</Link>
         <Link to={`/verify/${record.id}`} className="btn btn-secondary">Verify</Link>
         {showRetry && (

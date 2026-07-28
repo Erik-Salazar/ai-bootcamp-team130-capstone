@@ -5,6 +5,7 @@ import DashboardSkeleton from "../components/dashboard/DashboardSkeleton";
 import DashboardStatsBar from "../components/dashboard/DashboardStats";
 import DashboardToolbar from "../components/dashboard/DashboardToolbar";
 import RecordsTable from "../components/dashboard/RecordsTable";
+import PageBanner from "../components/PageBanner";
 import { DEFAULT_PAGE_SIZE, SORT_COLUMN_LABELS } from "../lib/dashboard/constants";
 import { computeDashboardStats } from "../lib/dashboard/stats";
 import { paginateItems } from "../lib/paginate";
@@ -71,7 +72,7 @@ export default function Dashboard() {
   }
 
   return (
-    <section className="dashboard-page">
+    <section className="page page--wide">
       <DashboardHeader />
 
       {!showSkeleton && (
@@ -98,16 +99,10 @@ export default function Dashboard() {
         onClearAll={clearFilters}
       />
 
-      {loadError && (
-        <div className="dashboard-banner dashboard-banner--error" role="alert">
-          {loadError}
-        </div>
-      )}
+      {loadError && <PageBanner type="error">{loadError}</PageBanner>}
 
       {retryMessage && (
-        <div className={`dashboard-banner dashboard-banner--${retryMessage.type}`} role="status">
-          {retryMessage.text}
-        </div>
+        <PageBanner type={retryMessage.type}>{retryMessage.text}</PageBanner>
       )}
 
       {showSkeleton ? (

@@ -133,7 +133,7 @@ Client-side validation mirrors spec §9 (V1–V8). Without a running API, read-o
 - **Smart contract** (`contracts/contracts/MaintNotary.sol`) matches spec §12,
   with passing Hardhat tests for the happy path, double-anchor guard, and
   `onlyOwner` guard.
-- **Frontend** (`web/`) — all five UI screens built with Vitest tests; awaits live API + chain for full integration.
+- **Frontend** (`web/`) — all five UI screens built with Vitest tests (unit + smoke + shared test vectors); awaits live API + chain for full integration.
 - **API routes, validation rules (V1-V8), anchor worker polling loop** are stubbed
   with `TODO(...)` comments — Neal (API) and Erik (worker/chain) own these.
 

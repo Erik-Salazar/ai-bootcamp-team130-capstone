@@ -3,6 +3,7 @@ import RecordDetailSkeleton from "../components/record-detail/RecordDetailSkelet
 import RecordIntegrityCard from "../components/record-detail/RecordIntegrityCard";
 import RecordJsonCard from "../components/record-detail/RecordJsonCard";
 import RecordOverviewCard from "../components/record-detail/RecordOverviewCard";
+import PageBanner from "../components/PageBanner";
 import PageErrorCard from "../components/PageErrorCard";
 import { useRecordDetail } from "../hooks/useRecordDetail";
 
@@ -19,7 +20,7 @@ export default function RecordDetail() {
   const showSkeleton = loading && !record && !loadError;
 
   return (
-    <section className="record-detail-page">
+    <section className="page page--narrow">
       {showSkeleton && (
         <>
           <header className="page-header page-header--accent">
@@ -47,15 +48,10 @@ export default function RecordDetail() {
           />
 
           {retryMessage && (
-            <div
-              className={`record-detail-banner record-detail-banner--${retryMessage.type}`}
-              role="status"
-            >
-              {retryMessage.text}
-            </div>
+            <PageBanner type={retryMessage.type}>{retryMessage.text}</PageBanner>
           )}
 
-          <div className="record-detail-stack">
+          <div className="page-stack">
             <RecordOverviewCard record={record} />
             <RecordIntegrityCard record={record} />
             <RecordJsonCard record={record} />

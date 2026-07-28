@@ -50,7 +50,7 @@ export default function VerifyJsonPanel({
 
         <textarea
           id="verify-json"
-          className="verify-json-panel__textarea"
+          className="json-editor"
           rows={12}
           value={jsonText}
           onChange={(e) => onJsonChange(e.target.value)}
@@ -58,7 +58,7 @@ export default function VerifyJsonPanel({
           spellCheck={false}
         />
 
-        {error && <p className="verify-json-panel__error" role="alert">{error}</p>}
+        {error && <p className="field-feedback field-feedback--error" role="alert">{error}</p>}
       </div>
 
       <div className="verify-card__footer">
@@ -66,7 +66,7 @@ export default function VerifyJsonPanel({
           ref={fileInputRef}
           type="file"
           accept=".json,application/json"
-          className="verify-json-panel__file-input"
+          className="json-file-input"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) onFileUpload(file);

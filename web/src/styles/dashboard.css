@@ -1,9 +1,4 @@
 /* Dashboard page */
-.dashboard-page {
-  max-width: 1120px;
-}
-
-/* Summary stat cards */
 .dashboard-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -245,29 +240,6 @@
 
 .filter-clear-all:hover {
   color: var(--modus-primary-dark);
-}
-
-.dashboard-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1rem;
-  margin-bottom: 1.25rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.dashboard-banner--success {
-  background: var(--modus-success-light);
-  border: 1px solid #b8dfc8;
-  color: var(--modus-success);
-}
-
-.dashboard-banner--error {
-  background: var(--modus-danger-light);
-  border: 1px solid #f0b8bc;
-  color: #7a1016;
 }
 
 /* Table card */

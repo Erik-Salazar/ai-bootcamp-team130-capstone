@@ -1,15 +1,4 @@
-/* Verify page — spec §13.4, styled to match Submit */
-
-.verify-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.verify-page--narrow {
-  max-width: 720px;
-  margin: 0 auto;
-}
+/* Verify page — spec §13.4 */
 
 /* How-it-works strip */
 .verify-steps-wrap {
@@ -79,19 +68,7 @@
   align-self: stretch;
 }
 
-.verify-banner {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-}
-
-.verify-banner--error {
-  background: var(--modus-danger-light);
-  border: 1px solid var(--modus-danger);
-  color: var(--modus-danger);
-}
-
-/* Shared card — matches submit-form */
+/* Shared card — used by Verify, Import, and aligned sections */
 .verify-card {
   background: var(--modus-gray-0);
   border: 1px solid var(--modus-gray-2);
@@ -129,6 +106,10 @@
 
 .verify-card__body {
   padding: 1.25rem;
+}
+
+.verify-card__body .page-banner {
+  margin-top: 0.75rem;
 }
 
 .verify-card__hint {
@@ -325,42 +306,6 @@
   word-break: break-all;
   flex: 1;
   min-width: 0;
-}
-
-/* JSON textarea */
-.verify-json-panel__textarea {
-  width: 100%;
-  min-height: 200px;
-  padding: 0.75rem 1rem;
-  border: 1.5px solid #d1d8e4;
-  border-radius: 8px;
-  font-family: "Roboto Mono", monospace;
-  font-size: 0.8rem;
-  line-height: 1.5;
-  resize: vertical;
-  background: var(--modus-gray-0);
-  color: var(--modus-gray-8);
-  transition: border-color 0.12s, box-shadow 0.12s;
-}
-
-.verify-json-panel__textarea:hover:not(:focus) {
-  border-color: #93b4e8;
-}
-
-.verify-json-panel__textarea:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.verify-json-panel__error {
-  margin: 0.75rem 0 0;
-  color: var(--modus-danger);
-  font-size: 0.875rem;
-}
-
-.verify-json-panel__file-input {
-  display: none;
 }
 
 @media (max-width: 640px) {

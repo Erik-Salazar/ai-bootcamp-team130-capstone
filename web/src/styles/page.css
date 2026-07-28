@@ -1,0 +1,131 @@
+/* Shared page layout, cards, banners, and JSON editors */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.page--narrow {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.page--wide {
+  max-width: 1120px;
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.page-header__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 0.35rem 0 0;
+}
+
+.page-header__meta code {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--modus-gray-8);
+}
+
+/* Inline / stacked status banners */
+.page-banner {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.page-banner--error {
+  background: var(--modus-danger-light);
+  border: 1px solid var(--modus-danger);
+  color: #7a1016;
+}
+
+.page-banner--success {
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  color: #1b5e20;
+}
+
+/* Field feedback under inputs / textareas */
+.field-feedback {
+  margin: 0.65rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.field-feedback--error {
+  color: var(--modus-danger);
+}
+
+.field-feedback--success {
+  color: var(--modus-success);
+}
+
+/* JSON textarea — shared by Verify + Import */
+.json-editor {
+  width: 100%;
+  min-height: 200px;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #d1d8e4;
+  border-radius: 8px;
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  resize: vertical;
+  background: var(--modus-gray-0);
+  color: var(--modus-gray-8);
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.json-editor:hover:not(:focus) {
+  border-color: #93b4e8;
+}
+
+.json-editor:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.json-editor--tall {
+  min-height: 280px;
+}
+
+/* JSON read-only preview blocks */
+.json-preview {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  background: var(--modus-gray-1);
+  border: 1px solid var(--modus-gray-2);
+  border-radius: 6px;
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--modus-gray-8);
+}
+
+.json-file-input {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .page-header__actions {
+    width: 100%;
+  }
+
+  .page-header__actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}

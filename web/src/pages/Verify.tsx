@@ -25,7 +25,7 @@ export default function Verify() {
   const showHowItWorks = showJsonPanel && !result && !loading && !loadError;
 
   return (
-    <section className="verify-page verify-page--narrow">
+    <section className="page page--narrow">
       <VerifyHeader showBackLink={Boolean(id)} />
 
       {showHowItWorks && <VerifyHowItWorks />}

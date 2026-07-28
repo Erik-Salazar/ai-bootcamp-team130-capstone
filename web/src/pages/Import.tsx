@@ -13,6 +13,7 @@ export default function Import() {
     submitting,
     success,
     preview,
+    validationErrors,
     canSubmit,
     handleFileUpload,
     clearForm,
@@ -22,14 +23,14 @@ export default function Import() {
 
   if (success) {
     return (
-      <section className="import-page import-page--narrow">
+      <section className="page page--narrow">
         <SubmitSuccess result={success} onReset={resetSuccess} />
       </section>
     );
   }
 
   return (
-    <section className="import-page import-page--narrow">
+    <section className="page page--narrow">
       <ImportHeader />
 
       <ImportWebhookPanel
@@ -44,6 +45,7 @@ export default function Import() {
       {preview && (
         <ImportPreviewCard
           preview={preview}
+          validationErrors={validationErrors}
           submitting={submitting}
           submitError={submitError}
           onSubmit={submitImport}

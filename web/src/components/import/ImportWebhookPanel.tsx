@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { EXAMPLE_WEBHOOK } from "./ImportHeader";
+import { EXAMPLE_WEBHOOK } from "../../lib/import/constants";
 
 interface ImportWebhookPanelProps {
   jsonText: string;
@@ -21,24 +21,24 @@ export default function ImportWebhookPanel({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="import-card">
-      <div className="import-card__header">
-        <span className="import-card__header-icon" aria-hidden="true">
+    <div className="verify-card">
+      <div className="verify-card__header">
+        <span className="verify-card__header-icon" aria-hidden="true">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
           </svg>
         </span>
-        Mock webhook payload
+        Webhook payload
       </div>
 
-      <div className="import-card__body">
-        <p className="import-card__hint">
-          Simulates an FMS <code>work_order.completed</code> event (spec §10). The API maps this to the canonical schema before validation.
+      <div className="verify-card__body">
+        <p className="verify-card__hint">
+          Paste a mock FMS <code>work_order.completed</code> event or upload a <code>.json</code> file.
         </p>
 
         <textarea
           id="import-webhook-json"
-          className="import-card__textarea"
+          className="json-editor json-editor--tall"
           rows={14}
           value={jsonText}
           onChange={(e) => onJsonChange(e.target.value)}
@@ -46,18 +46,20 @@ export default function ImportWebhookPanel({
           spellCheck={false}
         />
 
-        {error && <p className="import-card__error" role="alert">{error}</p>}
+        {error && <p className="field-feedback field-feedback--error" role="alert">{error}</p>}
         {canPreview && !error && (
-          <p className="import-card__ok" role="status">Payload looks valid — review the preview below before importing.</p>
+          <p className="field-feedback field-feedback--success" role="status">
+            Payload looks valid — review the preview below before importing.
+          </p>
         )}
       </div>
 
-      <div className="import-card__footer">
+      <div className="verify-card__footer">
         <input
           ref={fileInputRef}
           type="file"
           accept=".json,application/json"
-          className="import-card__file-input"
+          className="json-file-input"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) onFileUpload(file);
