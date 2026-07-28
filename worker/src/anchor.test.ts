@@ -197,6 +197,86 @@ describe("anchor workflow (mocked)", () => {
 });
 
 // ---------------------------------------------------------------------------
+// 3b. Idempotency guard — avoid double-submitting an already-anchored record
+// ---------------------------------------------------------------------------
+
+describe("anchor idempotency guard (mocked)", () => {
+  it("skips submission and marks anchored when the pre-submit check finds the record already on-chain", async () => {
+    // Regression test: a record can end up back in `pending_anchor` after a
+    // successful submission if only the confirmation-wait step failed (RPC
+    // hiccup). Re-submitting would revert with "Already anchored" and burn a
+    // retry. The pre-submit check should catch this before calling anchor().
+    const fakeRecord = makeFakeRecord({ status: "pending_anchor", retryCount: 1 });
+    const calls: string[] = [];
+
+    const mockReadHashes = mock.fn(async () =>
+      "0x535844002a6967e86b3f117acd4ecaa3ab16909f79ee21dcb5244f479bb06ab5"
+    );
+    const mockGetLogs = mock.fn(async () => [{ transactionHash: "0xrecovered" as Hex }]);
+    const mockWriteAnchor = mock.fn(async () => "0xshouldnotbecalled" as const);
+    const prismaUpdateSpy = mock.fn(async () => fakeRecord);
+    const mockAuditLog = mock.fn(async () => undefined);
+
+    await simulateProcessRecordWithPrecheck(
+      fakeRecord,
+      mockReadHashes,
+      mockGetLogs,
+      mockWriteAnchor,
+      prismaUpdateSpy,
+      mockAuditLog,
+      calls
+    );
+
+    assert.equal(mockWriteAnchor.mock.calls.length, 0, "should never call anchor() again");
+    assert.deepEqual(calls, ["anchored"]);
+    const updateArg = prismaUpdateSpy.mock.calls[0]?.arguments[0] as {
+      data: { status: string; txHash?: string };
+    };
+    assert.equal(updateArg.data.status, "anchored");
+    assert.equal(updateArg.data.txHash, "0xrecovered");
+  });
+
+  it("resolves as anchored (not a failed retry) when anchor() itself reverts with Already anchored", async () => {
+    const fakeRecord = makeFakeRecord({ status: "pending_anchor", retryCount: 2 });
+    const calls: string[] = [];
+
+    // Pre-check says "not yet anchored" (e.g. stale read / race), but the
+    // write call itself reverts — the defensive catch should still resolve
+    // this as anchored rather than incrementing retryCount toward failure.
+    const mockReadHashes = mock.fn(async () =>
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    );
+    const mockGetLogs = mock.fn(async () => [{ transactionHash: "0xrecovered2" as Hex }]);
+    const mockWriteAnchor = mock.fn(async () => {
+      throw new Error("Already anchored");
+    });
+    const prismaUpdateSpy = mock.fn(async () => fakeRecord);
+    const mockAuditLog = mock.fn(async () => undefined);
+
+    await simulateProcessRecordWithPrecheck(
+      fakeRecord,
+      mockReadHashes,
+      mockGetLogs,
+      mockWriteAnchor,
+      prismaUpdateSpy,
+      mockAuditLog,
+      calls
+    );
+
+    assert.deepEqual(calls, ["anchored"]);
+    const updateArg = prismaUpdateSpy.mock.calls[0]?.arguments[0] as {
+      data: { status: string; retryCount?: number };
+    };
+    assert.equal(updateArg.data.status, "anchored");
+    assert.equal(
+      updateArg.data.retryCount,
+      undefined,
+      "should not increment retryCount when resolved as already anchored"
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
 // 4. Crash-recovery simulation
 // ---------------------------------------------------------------------------
 
@@ -348,6 +428,69 @@ async function simulateProcessRecord(
     calls.push("anchored");
     await auditLog(record.id, "anchored", { txHash });
   } catch (err) {
+    const newRetryCount = record.retryCount + 1;
+    const exhausted = newRetryCount >= maxRetriesLocal;
+    await prismaUpdate({
+      where: { id: record.id },
+      data: {
+        retryCount: newRetryCount,
+        status: exhausted ? "anchor_failed" : "pending_anchor",
+      },
+    });
+    calls.push(exhausted ? "anchor_failed" : "retry");
+  }
+}
+
+const ZERO_BYTES32_TEST =
+  "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+/**
+ * Simulates the updated processRecord() flow — including the pre-submit
+ * on-chain check and the defensive "Already anchored" revert handling —
+ * without importing anchor.ts (avoids env/Prisma side-effects).
+ */
+async function simulateProcessRecordWithPrecheck(
+  record: FakeRecord,
+  readHashes: ReturnType<typeof mock.fn>,
+  getLogs: ReturnType<typeof mock.fn>,
+  writeAnchor: ReturnType<typeof mock.fn>,
+  prismaUpdate: ReturnType<typeof mock.fn>,
+  auditLog: ReturnType<typeof mock.fn>,
+  calls: string[],
+  maxRetriesLocal = 3
+): Promise<void> {
+  async function markAnchoredFromChain(note: string): Promise<void> {
+    const logs = await getLogs();
+    const txHash = logs[0]?.transactionHash ?? record.txHash ?? null;
+    await prismaUpdate({
+      where: { id: record.id },
+      data: { status: "anchored", anchoredAt: new Date(), txHash: txHash ?? undefined },
+    });
+    calls.push("anchored");
+    await auditLog(record.id, "anchored", { recovery: true, txHash, note });
+  }
+
+  // Pre-submit idempotency check
+  const onChainHash = await readHashes();
+  if (onChainHash !== ZERO_BYTES32_TEST) {
+    await markAnchoredFromChain("already anchored on-chain prior to submission");
+    return;
+  }
+
+  try {
+    const txHash = await writeAnchor();
+    await prismaUpdate({
+      where: { id: record.id },
+      data: { status: "tx_submitted", txHash, txSubmittedAt: new Date() },
+    });
+    calls.push("tx_submitted");
+    await auditLog(record.id, "tx_submitted", { txHash });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes("Already anchored")) {
+      await markAnchoredFromChain("anchor() reverted with Already anchored");
+      return;
+    }
     const newRetryCount = record.retryCount + 1;
     const exhausted = newRetryCount >= maxRetriesLocal;
     await prismaUpdate({

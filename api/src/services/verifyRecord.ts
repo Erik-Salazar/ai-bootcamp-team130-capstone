@@ -76,37 +76,37 @@ async function resolveIntegrity(
     };
   }
 
-  if (row.status !== "anchored" && !onChain) {
+  // The on-chain read is authoritative: a DB status of "anchored" is never
+  // sufficient on its own. This guards against a stale/incorrect DB status,
+  // an unset CONTRACT_ADDRESS, or an RPC/network issue silently making
+  // unverified records look "verified".
+  if (!onChain) {
     return {
       integrity: "not_anchored",
-      message: "Record is not yet anchored on-chain.",
+      message:
+        row.status === "anchored"
+          ? "Record is marked anchored in our records, but the on-chain anchor could not be confirmed. Please try again shortly."
+          : "Record is not yet anchored on-chain.",
     };
   }
 
-  if (onChain && onChain !== row.contentHash) {
+  if (onChain !== row.contentHash) {
     return {
       integrity: "mismatch",
       message: "Stored content_hash does not match on-chain anchor.",
     };
   }
 
-  if (submittedHash && onChain && submittedHash !== onChain) {
+  if (submittedHash && submittedHash !== onChain) {
     return {
       integrity: "mismatch",
       message: "Submitted record hash does not match on-chain anchor.",
     };
   }
 
-  if (row.status === "anchored" || onChain) {
-    return {
-      integrity: "verified",
-      message: "Record matches on-chain anchor. No tampering detected.",
-    };
-  }
-
   return {
-    integrity: "not_anchored",
-    message: "Record is not yet anchored on-chain.",
+    integrity: "verified",
+    message: "Record matches on-chain anchor. No tampering detected.",
   };
 }
 

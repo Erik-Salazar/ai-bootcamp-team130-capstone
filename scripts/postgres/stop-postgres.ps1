@@ -1,6 +1,17 @@
 # Stop the local MaintNotary Postgres cluster.
 $ErrorActionPreference = "Stop"
-$bin = "C:\Program Files\PostgreSQL\16\bin"
+$pgVersions = @("17", "18", "16")
+$bin = $null
+foreach ($ver in $pgVersions) {
+  $candidate = "C:\Program Files\PostgreSQL\$ver\bin"
+  if (Test-Path $candidate) {
+    $bin = $candidate
+    break
+  }
+}
+if (-not $bin) {
+  Write-Error "PostgreSQL bin not found. Install PostgreSQL 16+ or set `$bin in this script."
+}
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 
 $candidates = @(

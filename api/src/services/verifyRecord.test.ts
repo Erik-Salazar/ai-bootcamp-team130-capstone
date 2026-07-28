@@ -86,6 +86,21 @@ test("verifyById not_anchored when pending and no chain hash", async () => {
   assert.equal(result.integrity, "not_anchored");
 });
 
+test("verifyById not_anchored when DB says anchored but on-chain read returns nothing (stale status / unset contract / RPC issue)", async () => {
+  // Regression test: DB status alone must never be enough to report "verified" —
+  // the on-chain read is authoritative. See bug analysis: resolveIntegrity()
+  // used to fall through to "verified" whenever row.status === "anchored",
+  // even when the on-chain hash lookup came back null.
+  const result = await verifyById(
+    "uuid-1",
+    deps({
+      getById: async () => ({ ...baseRecord, status: "anchored" }),
+      getOnChainHash: async () => null,
+    })
+  );
+  assert.equal(result.integrity, "not_anchored");
+});
+
 test("verifyById mismatch when chain differs", async () => {
   const result = await verifyById(
     "uuid-1",

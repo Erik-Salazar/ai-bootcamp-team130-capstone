@@ -1,7 +1,18 @@
 # Start the local MaintNotary Postgres cluster (port 5432).
 # Does not touch SQL Server (port 1433).
 $ErrorActionPreference = "Stop"
-$bin = "C:\Program Files\PostgreSQL\16\bin"
+$pgVersions = @("17", "18", "16")
+$bin = $null
+foreach ($ver in $pgVersions) {
+  $candidate = "C:\Program Files\PostgreSQL\$ver\bin"
+  if (Test-Path $candidate) {
+    $bin = $candidate
+    break
+  }
+}
+if (-not $bin) {
+  Write-Error "PostgreSQL bin not found. Install PostgreSQL 16+ or set `$bin in this script."
+}
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 
 $candidates = @(
@@ -18,10 +29,6 @@ Postgres data directory not found. Expected one of:
 Initialize a cluster first, for example:
   & `"$bin\initdb.exe`" -D `"$($candidates[0])`" -U postgres --auth-local=trust --auth-host=scram-sha-256
 "@
-}
-
-if (-not (Test-Path $bin)) {
-    Write-Error "PostgreSQL 16 bin not found at $bin. Install PostgreSQL 16 or edit `$bin in this script."
 }
 
 $env:Path = "$bin;" + $env:Path

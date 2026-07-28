@@ -78,10 +78,16 @@ export const publicClient = createPublicClient({
   transport: buildTransport(),
 });
 
+function normalizePrivateKey(privateKey: string): Hex {
+  const trimmed = privateKey.trim();
+  const hex = trimmed.startsWith("0x") ? trimmed : `0x${trimmed}`;
+  return hex as Hex;
+}
+
 export function getWalletClient() {
   const privateKey = process.env.ANCHOR_PRIVATE_KEY;
   if (!privateKey) throw new Error("ANCHOR_PRIVATE_KEY is not set");
-  const account = privateKeyToAccount(privateKey as Hex);
+  const account = privateKeyToAccount(normalizePrivateKey(privateKey));
   return createWalletClient({
     account,
     chain: baseSepolia,

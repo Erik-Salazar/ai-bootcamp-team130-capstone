@@ -15,6 +15,8 @@ const pollIntervalMs = Number(process.env.ANCHOR_POLL_INTERVAL_MS ?? 15_000);
 const maxRetries = Number(process.env.ANCHOR_MAX_RETRIES ?? 3);
 const confirmations = Number(process.env.ANCHOR_CONFIRMATIONS ?? 2);
 
+const ZERO_BYTES32 = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
 // Prevent poll cycles from overlapping if anchoring is slow.
 let polling = false;
 
@@ -32,6 +34,119 @@ async function writeAuditLog(
   });
 }
 
+/** True when a contract revert reason indicates the recordId was already anchored. */
+function isAlreadyAnchoredError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err);
+  return message.includes("Already anchored");
+}
+
+/** Reads hashes[recordId] and reports whether it's set (non-zero) on-chain. */
+async function readIsAnchoredOnChain(
+  recordIdBytes32: Hex,
+  contractAddress: Address
+): Promise<boolean> {
+  const onChainHash = await publicClient.readContract({
+    address: contractAddress,
+    abi: MAINTNOTARY_ABI,
+    functionName: "hashes",
+    args: [recordIdBytes32],
+  });
+  return onChainHash !== ZERO_BYTES32;
+}
+
+/** Recovers the anchoring tx hash from the RecordAnchored event log (best-effort). */
+async function recoverTxHashFromLogs(
+  recordIdBytes32: Hex,
+  contractAddress: Address
+): Promise<Hex | null> {
+  const currentBlock = await publicClient.getBlockNumber();
+  const fromBlock = currentBlock > 10_000n ? currentBlock - 10_000n : 0n;
+
+  const logs = await publicClient.getLogs({
+    address: contractAddress,
+    event: {
+      type: "event",
+      name: "RecordAnchored",
+      inputs: [
+        { name: "recordId", type: "bytes32", indexed: true },
+        { name: "contentHash", type: "bytes32", indexed: false },
+        { name: "timestamp", type: "uint256", indexed: false },
+      ],
+    } as const,
+    args: { recordId: recordIdBytes32 },
+    fromBlock,
+    toBlock: "latest",
+  });
+
+  return logs[0]?.transactionHash ?? null;
+}
+
+/**
+ * Marks a record anchored based on confirmed on-chain state (rather than a
+ * fresh submission), recovering the tx hash from event logs when possible.
+ * Shared by crash-recovery and the pre-submit/defensive checks in
+ * processRecord — both cases where we've learned the recordId is already
+ * anchored without having just submitted the transaction ourselves.
+ */
+async function markAnchoredFromChain(
+  record: PrismaRecord,
+  recordIdBytes32: Hex,
+  contractAddress: Address,
+  note: string
+): Promise<void> {
+  const txHash = (await recoverTxHashFromLogs(recordIdBytes32, contractAddress)) ?? record.txHash ?? null;
+
+  await prisma.record.update({
+    where: { id: record.id },
+    data: {
+      status: "anchored",
+      anchoredAt: new Date(),
+      txHash: txHash ?? undefined,
+    },
+  });
+
+  await writeAuditLog(record.id, "anchored", { recovery: true, txHash, note });
+}
+
+/**
+ * Idempotency guard: checks on-chain state before submitting.
+ *
+ * Without this, a record that failed only because `waitForTransactionReceipt`
+ * errored out (RPC hiccup, timeout) — even though the anchor tx was actually
+ * mined — would get reset to `pending_anchor` and re-submitted. The second
+ * `anchor()` call reverts with "Already anchored", burning a retry, and after
+ * `maxRetries` a genuinely-anchored record ends up incorrectly marked
+ * `anchor_failed`. Checking `hashes[recordId]` first avoids the double-submit
+ * entirely.
+ */
+async function isAlreadyAnchoredOnChain(
+  record: PrismaRecord,
+  recordIdBytes32: Hex,
+  contractAddress: Address
+): Promise<boolean> {
+  try {
+    const isAnchored = await readIsAnchoredOnChain(recordIdBytes32, contractAddress);
+    if (isAnchored) {
+      await markAnchoredFromChain(
+        record,
+        recordIdBytes32,
+        contractAddress,
+        "already anchored on-chain prior to submission; skipped duplicate anchor() call"
+      );
+      console.log(
+        `[worker] ${record.recordId} already anchored on-chain — skipping duplicate submission`
+      );
+    }
+    return isAnchored;
+  } catch (err) {
+    // If the pre-check itself fails (e.g. RPC issue), don't block the normal
+    // submit flow — let the regular try/catch below handle retries.
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn(`[worker] pre-submit anchor check failed for ${record.recordId}: ${message}`);
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Core anchor flow for a single record
 // ---------------------------------------------------------------------------
@@ -39,6 +154,12 @@ async function writeAuditLog(
 async function processRecord(record: PrismaRecord): Promise<void> {
   const recordIdBytes32 = recordIdToBytes32(record.recordId);
   const contentHashBytes32 = contentHashToBytes32(record.contentHash);
+  const contractAddress = process.env.CONTRACT_ADDRESS as Address | undefined;
+
+  if (contractAddress) {
+    const alreadyAnchored = await isAlreadyAnchoredOnChain(record, recordIdBytes32, contractAddress);
+    if (alreadyAnchored) return;
+  }
 
   let txHash: Hex;
 
@@ -62,6 +183,20 @@ async function processRecord(record: PrismaRecord): Promise<void> {
 
     console.log(`[worker] tx submitted for ${record.recordId}: ${txHash}`);
   } catch (err) {
+    // Defensive fallback: a race between two poll cycles (or a pre-check that
+    // missed a just-mined tx) can still surface as an "Already anchored"
+    // revert here. Resolve from chain state instead of counting it as a
+    // failed attempt against a record that's actually fine.
+    if (contractAddress && isAlreadyAnchoredError(err)) {
+      await markAnchoredFromChain(
+        record,
+        recordIdBytes32,
+        contractAddress,
+        "anchor() reverted with Already anchored; resolved from on-chain state"
+      );
+      console.log(`[worker] ${record.recordId} was already anchored on-chain (revert) — marked anchored`);
+      return;
+    }
     await handleAnchorFailure(record, err);
     return;
   }
@@ -181,55 +316,15 @@ async function resolveStaleRecord(
   const recordIdBytes32 = recordIdToBytes32(record.recordId);
 
   try {
-    // Ask the contract whether this recordId has been anchored.
-    const onChainHash = await publicClient.readContract({
-      address: contractAddress,
-      abi: MAINTNOTARY_ABI,
-      functionName: "hashes",
-      args: [recordIdBytes32],
-    });
-
-    const isAnchored =
-      onChainHash !== "0x0000000000000000000000000000000000000000000000000000000000000000";
+    const isAnchored = await readIsAnchoredOnChain(recordIdBytes32, contractAddress);
 
     if (isAnchored) {
-      // Recover the tx hash from the RecordAnchored event log.
-      const currentBlock = await publicClient.getBlockNumber();
-      const fromBlock = currentBlock > 10_000n ? currentBlock - 10_000n : 0n;
-
-      const logs = await publicClient.getLogs({
-        address: contractAddress,
-        event: {
-          type: "event",
-          name: "RecordAnchored",
-          inputs: [
-            { name: "recordId", type: "bytes32", indexed: true },
-            { name: "contentHash", type: "bytes32", indexed: false },
-            { name: "timestamp", type: "uint256", indexed: false },
-          ],
-        } as const,
-        args: { recordId: recordIdBytes32 },
-        fromBlock,
-        toBlock: "latest",
-      });
-
-      const txHash = logs[0]?.transactionHash ?? record.txHash ?? null;
-
-      await prisma.record.update({
-        where: { id: record.id },
-        data: {
-          status: "anchored",
-          anchoredAt: new Date(),
-          txHash: txHash ?? undefined,
-        },
-      });
-
-      await writeAuditLog(record.id, "anchored", {
-        recovery: true,
-        txHash,
-        note: "resolved by crash-recovery scan",
-      });
-
+      await markAnchoredFromChain(
+        record,
+        recordIdBytes32,
+        contractAddress,
+        "resolved by crash-recovery scan"
+      );
       console.log(`[worker] crash-recovery: ${record.recordId} is anchored on-chain — marked anchored`);
     } else {
       // Not found on-chain — reset so the next poll can retry it.
