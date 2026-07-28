@@ -1,6 +1,48 @@
 import { createHash } from "crypto";
 import type { HashableRecord, MaintenanceRecord } from "./types";
 
+/** Spec §8 field allowlist (including `source`, which is stripped before hashing). */
+export const CANONICAL_FIELD_NAMES = [
+  "schema_version",
+  "record_id",
+  "vin",
+  "equipment_label",
+  "service_type",
+  "completed_at",
+  "odometer_miles",
+  "shop_name",
+  "notes",
+  "source",
+] as const;
+
+const ALLOWED_FIELDS = new Set<string>(CANONICAL_FIELD_NAMES);
+
+/**
+ * Thrown when a record contains keys outside the §8 allowlist (strict mode).
+ * API maps this to a 400 validation-style response.
+ */
+export class UnknownFieldError extends Error {
+  readonly code = "UNKNOWN_FIELD" as const;
+  readonly fields: string[];
+
+  constructor(fields: string[]) {
+    const sorted = [...fields].sort();
+    super(`Unknown field(s): ${sorted.join(", ")}`);
+    this.name = "UnknownFieldError";
+    this.fields = sorted;
+  }
+}
+
+/**
+ * Rejects any top-level keys not in the §8 allowlist (spec §8, rule 2).
+ */
+export function assertKnownFields(record: object): void {
+  const unknown = Object.keys(record).filter((key) => !ALLOWED_FIELDS.has(key));
+  if (unknown.length > 0) {
+    throw new UnknownFieldError(unknown);
+  }
+}
+
 /**
  * Deep-sorts object keys alphabetically (spec §8, rule 3).
  * Arrays are preserved in order; only object keys are sorted.
@@ -21,11 +63,13 @@ function deepSortKeys(value: unknown): unknown {
 
 /**
  * Produces the canonical JSON string for a record per spec §8:
- * 1. Remove `source`
- * 2. Deep-sort keys alphabetically
- * 3. Serialize with no extra whitespace / no trailing newline
+ * 1. Reject unknown fields (strict allowlist)
+ * 2. Remove `source`
+ * 3. Deep-sort keys alphabetically
+ * 4. Serialize with no extra whitespace / no trailing newline
  */
 export function toCanonicalJson(record: MaintenanceRecord | HashableRecord): string {
+  assertKnownFields(record as object);
   const { source: _source, ...rest } = record as MaintenanceRecord;
   const sorted = deepSortKeys(rest);
   return JSON.stringify(sorted);

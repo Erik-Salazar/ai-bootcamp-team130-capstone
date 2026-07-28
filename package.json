@@ -15,6 +15,7 @@
     "dev:api": "npm run dev --workspace=api",
     "dev:worker": "npm run dev --workspace=worker",
     "dev:web": "npm run dev --workspace=web",
+    "test": "npm run test:shared && npm run test:api && npm run test --workspace=web && npm run test:contracts",
     "test:shared": "npm run test --workspace=shared",
     "test:api": "npm run test --workspace=api",
     "test:contracts": "npm run test --workspace=contracts"

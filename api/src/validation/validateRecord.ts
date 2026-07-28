@@ -1,33 +1,122 @@
 /**
- * Validation engine skeleton (spec §9, rules V1-V8).
+ * Validation engine (spec §9, rules V1–V8).
  *
- * Each rule below is a placeholder — implement the real checks here.
- * Keep one function per rule so each can be unit tested independently
- * against `shared/test-vectors.json`.
+ * Pure rules live in rules.ts / vin.ts. V5/V6 use injected lookups — no Prisma here.
  */
 
-export interface ValidationError {
-  code:
-    | "MISSING_FIELD"
-    | "INVALID_VIN"
-    | "FUTURE_DATE"
-    | "INVALID_ODOMETER"
-    | "MILEAGE_ROLLBACK"
-    | "DUPLICATE_RECORD"
-    | "INVALID_SERVICE"
-    | "UNSUPPORTED_SCHEMA";
-  field?: string;
-  message: string;
+import {
+  checkCompletedAt,
+  checkOdometer,
+  checkRequiredFields,
+  checkSchemaVersion,
+  checkServiceType,
+  checkVin,
+  readOdometer,
+  readRecordId,
+  readVin,
+} from "./rules";
+import type { ValidationError, ValidationResult } from "./types";
+
+export type { ValidationError, ValidationResult };
+
+/** DB-facing lookups for V5/V6 — inject fakes in unit tests. */
+export type RecordLookups = {
+  findLastAnchoredOdometer(vin: string): Promise<number | null>;
+  recordIdExists(recordId: string): Promise<boolean>;
+};
+
+export type ValidateRecordOptions = {
+  lookups: RecordLookups;
+  /** Injected clock for deterministic V3 tests. */
+  now?: Date;
+};
+
+function asObject(input: unknown): Record<string, unknown> | null {
+  if (input === null || typeof input !== "object" || Array.isArray(input)) {
+    return null;
+  }
+  return input as Record<string, unknown>;
 }
 
-export interface ValidationResult {
-  valid: boolean;
-  errors: ValidationError[];
+/** V5 — odometer >= last anchored for VIN. */
+async function checkMileageMonotonicity(
+  input: Record<string, unknown>,
+  lookups: RecordLookups
+): Promise<ValidationError[]> {
+  const vin = readVin(input);
+  const odometer = readOdometer(input);
+  if (!vin || odometer === null) return [];
+
+  const last = await lookups.findLastAnchoredOdometer(vin);
+  if (last === null) return [];
+
+  if (odometer < last) {
+    return [{
+      code: "MILEAGE_ROLLBACK",
+      field: "odometer_miles",
+      message: `Odometer ${odometer} is below last recorded ${last} for this VIN.`,
+    }];
+  }
+  return [];
 }
 
-// TODO(Backend): implement V1-V8 from spec §9.
-// V5 (mileage rollback) and V6 (duplicate record) require a DB lookup,
-// so this function should be async once wired up to Prisma.
-export async function validateRecord(_input: unknown): Promise<ValidationResult> {
-  return { valid: true, errors: [] };
+/** V6 — record_id must not already exist. */
+async function checkDuplicateRecordId(
+  input: Record<string, unknown>,
+  lookups: RecordLookups
+): Promise<ValidationError[]> {
+  const recordId = readRecordId(input);
+  if (!recordId) return [];
+
+  const exists = await lookups.recordIdExists(recordId);
+  if (!exists) return [];
+
+  return [{
+    code: "DUPLICATE_RECORD",
+    field: "record_id",
+    message: `record_id "${recordId}" already exists.`,
+  }];
+}
+
+/**
+ * Run V1–V8. Collects all applicable errors (does not short-circuit after the first).
+ */
+export async function validateRecord(
+  input: unknown,
+  options: ValidateRecordOptions
+): Promise<ValidationResult> {
+  const obj = asObject(input);
+  if (!obj) {
+    return {
+      valid: false,
+      errors: [{
+        code: "MISSING_FIELD",
+        message: "Request body must be a JSON object.",
+      }],
+    };
+  }
+
+  const now = options.now ?? new Date();
+  const errors: ValidationError[] = [
+    ...checkRequiredFields(obj),
+    ...checkSchemaVersion(obj),
+    ...checkVin(obj),
+    ...checkCompletedAt(obj, now),
+    ...checkOdometer(obj),
+    ...checkServiceType(obj),
+  ];
+
+  // V5/V6 only when field-level checks for those values already passed
+  const hasVinError = errors.some((e) => e.field === "vin");
+  const hasOdoError = errors.some((e) => e.field === "odometer_miles");
+  const hasIdError = errors.some((e) => e.field === "record_id");
+
+  if (!hasVinError && !hasOdoError) {
+    errors.push(...(await checkMileageMonotonicity(obj, options.lookups)));
+  }
+  if (!hasIdError) {
+    errors.push(...(await checkDuplicateRecordId(obj, options.lookups)));
+  }
+
+  return { valid: errors.length === 0, errors };
 }

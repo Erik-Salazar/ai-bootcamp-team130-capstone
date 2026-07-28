@@ -25,3 +25,10 @@ web/dist/
 .vscode/
 !.vscode/extensions.json
 .idea/
+
+# Local Postgres cluster data (see scripts/postgres/)
+.local/postgres-data/
+scripts/postgres/data/
+.cursor/PostgresSetup/data/
+.cursor/PostgresSetup/setup.log
+.cursor/PostgresSetup/*.log

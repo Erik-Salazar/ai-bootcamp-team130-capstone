@@ -10,6 +10,7 @@ import type { SubmitFormData } from "./types";
 
 export function toSubmitPayload(form: SubmitFormData): SubmitRecordRequest {
   return {
+    schema_version: "1.0",
     record_id: sanitizeText(form.record_id, MAX_RECORD_ID_LENGTH),
     vin: sanitizeText(form.vin, 17).toUpperCase(),
     equipment_label: sanitizeText(form.equipment_label, MAX_EQUIPMENT_LABEL_LENGTH) || undefined,

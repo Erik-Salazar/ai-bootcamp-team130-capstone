@@ -69,6 +69,7 @@ export interface VerifyResponse {
 }
 
 export interface SubmitRecordRequest {
+  schema_version: "1.0";
   record_id: string;
   vin: string;
   equipment_label?: string;

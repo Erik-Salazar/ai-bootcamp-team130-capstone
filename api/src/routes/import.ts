@@ -1,12 +1,18 @@
 import { Router } from "express";
 import { requireApiKey } from "../middleware/auth";
+import { submitDeps } from "../deps";
+import { mapImportPayload } from "../services/mapImportPayload";
+import { submitRecord } from "../services/submitRecord";
 
 export const importRouter = Router();
 
 // POST /api/import — spec §10, mock FMS webhook payload
-importRouter.post("/", requireApiKey, async (_req, res) => {
-  // TODO(Backend): map mock webhook payload fields to canonical schema
-  // (work_order_id -> record_id, vehicle_vin -> vin, etc.), set source="import",
-  // then run the same validate -> canonicalize -> persist flow as POST /records.
-  return res.status(501).json({ success: false, errors: [{ code: "NOT_IMPLEMENTED", message: "Import not yet implemented" }] });
+importRouter.post("/", requireApiKey, async (req, res) => {
+  const mapped = mapImportPayload(req.body);
+  if (!mapped.ok) {
+    return res.status(400).json({ success: false, errors: mapped.errors });
+  }
+
+  const result = await submitRecord(mapped.body, "import", submitDeps);
+  return res.status(result.status).json(result.body);
 });
