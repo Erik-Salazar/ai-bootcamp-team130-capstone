@@ -15,6 +15,7 @@ import { useDashboardRecords } from "../hooks/useDashboardRecords";
 export default function Dashboard() {
   const {
     records,
+    allRecords,
     vinFilter,
     vinDebounced,
     setVinFilter,
@@ -49,7 +50,7 @@ export default function Dashboard() {
     [sortedRecords, page, pageSize],
   );
 
-  const stats = useMemo(() => computeDashboardStats(records), [records]);
+  const stats = useMemo(() => computeDashboardStats(allRecords), [allRecords]);
   const sortSummary = getSortSummary(sort.column, sort.direction, SORT_COLUMN_LABELS[sort.column]);
 
   useEffect(() => {

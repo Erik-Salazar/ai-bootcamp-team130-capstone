@@ -13,6 +13,10 @@ function applyStatusFilter(records: ApiRecordSummary[], status: string) {
 
 export function useDashboardRecords() {
   const [records, setRecords] = useState<ApiRecordSummary[]>([]);
+  // Unfiltered-by-status records (still respects the VIN filter). Used to
+  // power the stats bar so "Total records" etc. don't change just because
+  // a status filter chip is toggled.
+  const [allRecords, setAllRecords] = useState<ApiRecordSummary[]>([]);
   const [vinFilter, setVinFilterState] = useState("");
   const vinDebounced = useDebouncedValue(vinFilter, VIN_DEBOUNCE_MS);
   const [statusFilter, setStatusFilter] = useState("");
@@ -37,17 +41,19 @@ export function useDashboardRecords() {
     else setLoading(true);
     setLoadError(null);
 
-    const params: { vin?: string; status?: string } = {};
+    // Status filtering is applied client-side (see below) so the stats bar
+    // can always reflect the full, vin-filtered result set regardless of
+    // which status chip is active.
+    const params: { vin?: string } = {};
     if (vinDebounced.trim()) params.vin = vinDebounced.trim();
-    if (statusFilter && statusFilter !== "in_progress") params.status = statusFilter;
 
     try {
       const result = await listRecords(params);
       if (latestRequestId.current !== requestId) return; // superseded by a newer request
-      setRecords(applyStatusFilter(result.records, statusFilter));
+      setAllRecords(result.records);
     } catch {
       if (latestRequestId.current !== requestId) return;
-      setRecords([]);
+      setAllRecords([]);
       setLoadError("Could not load records. Make sure the API is running at the configured URL.");
     } finally {
       if (latestRequestId.current === requestId) {
@@ -55,7 +61,11 @@ export function useDashboardRecords() {
         setRefreshing(false);
       }
     }
-  }, [vinDebounced, statusFilter]);
+  }, [vinDebounced]);
+
+  useEffect(() => {
+    setRecords(applyStatusFilter(allRecords, statusFilter));
+  }, [allRecords, statusFilter]);
 
   useEffect(() => {
     loadRecords();
@@ -116,6 +126,7 @@ export function useDashboardRecords() {
 
   return {
     records,
+    allRecords,
     vinFilter,
     vinDebounced,
     setVinFilter,
